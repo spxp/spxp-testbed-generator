@@ -325,7 +325,8 @@ public class SpxpProfileData {
 		for(int i = 0; i < privateData.size(); i++) {
 			JSONObject p = privateData.get(i);
 			SpxpProfileGroupData grp = groups.get(i);
-			SpxpSymmetricKeySpec keySpec = grp.getRoundKeyForTime(now).getRoundKey();
+			long d = grp.getOldestRoundKeySince() + rand.nextInt((int)(now.getTime()-grp.getOldestRoundKeySince()));
+			SpxpSymmetricKeySpec keySpec = grp.getRoundKeyForTime(new Date(d)).getRoundKey();
 			if(!p.isEmpty()) {
 				privateArray.put(SpxpCryptoTools.encryptSymmetricCompact(p.toString(), keySpec.getKeyId(), keySpec.getSymmetricKey()));
 			}
