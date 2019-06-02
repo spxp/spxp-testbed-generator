@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class SpxpProfileGroupData {
 	
@@ -58,6 +59,10 @@ public class SpxpProfileGroupData {
 		}
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 		throw new RuntimeException("Not enough round keys. was looking for "+sdf.format(d)+" but last available key is valid since "+sdf.format(roundKeys.getLast().getValidSince()));
+	}
+	
+	public SpxpRoundKey getRandomRoundKey(Random rand) {
+		return roundKeys.get(rand.nextInt(roundKeys.size()));
 	}
 	
 	public long getOldestRoundKeySince() {
