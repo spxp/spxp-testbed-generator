@@ -361,12 +361,49 @@ public class SpxpProfileData {
 	}
 
 	public void writeSpxpFriends(File targetDir, String baseUrl) throws Exception {
-		JSONObject friendsObj = new JSONObject();
+		ArrayList<JSONArray> privateData = new ArrayList<>();
+		for(int i = 0; i < nonVirtualGroupsCount; i++) {
+			privateData.add(new JSONArray());
+		}
 		JSONArray friendsData = new JSONArray();
 		for(SpxpFriendConnectionData frindConnection : friendConnections) {
-			friendsData.put(baseUrl + frindConnection.getPeerProfile().getProfileName());
+			String friendUrl = baseUrl + frindConnection.getPeerProfile().getProfileName();
+			if(rand.nextInt(4) != 0) {
+				// 75% of friends connections are public
+				friendsData.put(friendUrl);
+				continue;
+			}
+			if(privateData.size() == 1 || rand.nextInt(2) == 0) {
+				privateData.get(0).put(friendUrl);
+				continue;
+			}
+			boolean atLeastInOneGroup = false;
+			for(int i = 1; i < privateData.size(); i++) {
+				if(rand.nextInt(3) == 0) {
+					privateData.get(i).put(friendUrl);
+					atLeastInOneGroup = true;
+				}
+			}
+			if(!atLeastInOneGroup) {
+				privateData.get(0).put(friendUrl);
+			}
 		}
+		JSONObject friendsObj = new JSONObject();
 		friendsObj.put("data", friendsData);
+		JSONArray privateArray = new JSONArray();
+		for(int i = 0; i < privateData.size(); i++) {
+			JSONArray a = privateData.get(i);
+			SpxpProfileGroupData grp = groups.get(i);
+			SpxpSymmetricKeySpec keySpec = grp.getRandomRoundKey(rand).getRoundKey();
+			if(!a.isEmpty()) {
+				JSONObject p = new JSONObject();
+				p.put("data", a);
+				privateArray.put(SpxpCryptoTools.encryptSymmetricCompact(p.toString(), keySpec.getKeyId(), keySpec.getSymmetricKey()));
+			}
+		}
+		if(!privateArray.isEmpty()) {
+			friendsObj.put("private", privateArray);
+		}
 		try( OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(targetDir, profileName)), StandardCharsets.UTF_8) ) {
 			friendsObj.write(out, 4, 0);
 		}
