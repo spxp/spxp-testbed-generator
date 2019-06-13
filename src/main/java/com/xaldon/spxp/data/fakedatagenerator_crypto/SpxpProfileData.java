@@ -1,13 +1,19 @@
 package com.xaldon.spxp.data.fakedatagenerator_crypto;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,9 +24,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+
+import org.apache.cxf.common.util.Base64UrlUtility;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.spxp.crypto.SpxpCryptoTools;
+
+import com.xaldon.spxp.data.fakedatagenerator.Tools;
 
 public class SpxpProfileData {
 	
@@ -297,7 +313,7 @@ public class SpxpProfileData {
 		}
 	}
 	
-	public void writeSpxpProfile(File targetDir, Date now) throws Exception {
+	public void writeSpxpProfile(File targetDir, Date now, File imageSourceDir) throws Exception {
 		JSONObject profileObj = new JSONObject();
 		ArrayList<JSONObject> privateData = new ArrayList<>();
 		for(int i = 0; i < nonVirtualGroupsCount; i++) {
@@ -316,7 +332,11 @@ public class SpxpProfileData {
 		coordinatesObj.put("latitude", latitude);
 		coordinatesObj.put("longitude", longitude);
 		addSpxpElement(profileObj, privateData, "coordinates", coordinatesObj);
-		profileObj.put("profilePhoto", "images/"+profilePhoto);
+		if(rand.nextInt(2) == 0) {
+			profileObj.put("profilePhoto", encryptProfilePhoto(profilePhoto, imageSourceDir, targetDir));
+		} else {
+			profileObj.put("profilePhoto", "images/"+profilePhoto);
+		}
 		profileObj.put("friendsEndpoint", "friends/"+profileName);
 		profileObj.put("postsEndpoint", "posts/_read-posts.php?profile="+profileName);
 		profileObj.put("albumsEndpoint", "albums/"+profileName);
@@ -338,7 +358,7 @@ public class SpxpProfileData {
 			profileObj.write(out, 4, 0);
 		}
 	}
-	
+
 	private void addSpxpElement(JSONObject profileObj, ArrayList<JSONObject> privateData, String name, Object value) {
 		if(rand.nextInt(3) == 0) {
 			profileObj.put(name, value);
@@ -358,6 +378,59 @@ public class SpxpProfileData {
 		if(!atLeastInOneGroup) {
 			privateData.get(0).put(name, value);
 		}
+	}
+	
+	private JSONObject encryptProfilePhoto(String profilePhoto, File imageSourceDir, File targetDir) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
+		int keyLength = 256;
+		int ivLength = 96;
+		int authTagLength = 128;
+		int authTagBytes = authTagLength / 8;
+		// content encryption key
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(keyLength);
+		SecretKey secretKey = keyGen.generateKey();
+		// IV
+		byte[] iv = CryptoTools.generateSymmetricKey(ivLength);
+		// algo params
+		AlgorithmParameterSpec algoParamSpec = new GCMParameterSpec(authTagLength, iv);
+		// Cipher
+		String algorithm = "AES/GCM/NoPadding";
+		Cipher c = Cipher.getInstance(algorithm);
+		c.init(Cipher.ENCRYPT_MODE, secretKey, algoParamSpec);
+		// encrypt
+		RestrainLastNBytesOutputStream rlnbos = null;
+		CipherOutputStream cos = null;
+		byte[] tag;
+		try(FileInputStream in = new FileInputStream(new File(imageSourceDir, profilePhoto))) {
+			rlnbos = new RestrainLastNBytesOutputStream(new FileOutputStream(new File(targetDir, "images_enc/"+profileName+".encrypted")),authTagBytes);
+			cos = new CipherOutputStream(rlnbos,c);
+			try {
+				Tools.copyStreams(in, cos);
+			} finally {
+				cos.close();
+			}
+			tag = rlnbos.getRestrainedBytes();
+		}
+		// build describing JSON object
+		JSONObject result = new JSONObject();
+		result.put("iv", Base64UrlUtility.encode(iv));
+		result.put("k", Base64UrlUtility.encode(secretKey.getEncoded()));
+		result.put("tag", Base64UrlUtility.encode(tag));
+		result.put("enc", "A256GCM");
+		result.put("url", "images_enc/"+profileName+".encrypted");
+		// debug encrypted with tag at the end
+		c = Cipher.getInstance(algorithm);
+		c.init(Cipher.ENCRYPT_MODE, secretKey, algoParamSpec);
+		try(FileInputStream in = new FileInputStream(new File(imageSourceDir, profilePhoto))) {
+			try(CipherOutputStream o = new CipherOutputStream(new FileOutputStream(new File(targetDir, "images_enc/"+profileName+".encrypted.debug")),c)) {
+				try {
+					Tools.copyStreams(in, o);
+				} finally {
+					o.close();
+				}
+			}
+		}
+		return result;
 	}
 
 	public void writeSpxpFriends(File targetDir, String baseUrl) throws Exception {

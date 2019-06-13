@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,17 +20,20 @@ public class Tools {
 	private Tools() {
 		// prevent instantiation
 	}
+	
+	public static void copyStreams(InputStream in, OutputStream out) throws IOException {
+        int bytesRead = -1;
+        byte[] buffer = new byte[4096];
+        while ((bytesRead = in.read(buffer)) != -1) {
+            out.write(buffer, 0, bytesRead);
+        }
+	}
 
 	public static void downloadTo(URL url, File target) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         try( FileOutputStream fos = new FileOutputStream(target) ) {
         	try( InputStream inputStream = conn.getInputStream() ) {
-                int bytesRead = -1;
-                byte[] buffer = new byte[4096];
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    fos.write(buffer, 0, bytesRead);
-                }
-        		
+        		copyStreams(inputStream, fos);
         	}
         }
 	}

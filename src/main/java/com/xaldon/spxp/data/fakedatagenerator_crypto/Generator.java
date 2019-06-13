@@ -114,6 +114,7 @@ public class Generator {
 		Date now = new Date();
 		loadSampleData();
 		loadKeyCache();
+		File imageSourceDir = new File(outDir, "spxp/images");
 		File targetDir = new File(outDir, "crypto_spxp");
 		if(!targetDir.exists()) {
 			targetDir.mkdirs();
@@ -133,6 +134,10 @@ public class Generator {
 		File postsDir = new File(targetDir, "posts");
 		if(!postsDir.exists()) {
 			postsDir.mkdirs();
+		}
+		File encryptedImagesDir = new File(targetDir, "images_enc");
+		if(!encryptedImagesDir.exists()) {
+			encryptedImagesDir.mkdirs();
 		}
 		if(DEBUG_LOG) {
 			File debugDir = new File(targetDir, "debug");
@@ -159,7 +164,7 @@ public class Generator {
 		int i = 0;
 		for(SpxpProfileData profile : profiles) {
 			profile.writeProfileFile(profilesDir, BASE_URL);
-			profile.writeSpxpProfile(targetDir, now);
+			profile.writeSpxpProfile(targetDir, now, imageSourceDir);
 			profile.writeSpxpFriends(friendsDir, BASE_URL);
 			profile.writePosts(postsDir);
 			profile.writeSpxpKeys(keysDir, condensedRoundKeys);
