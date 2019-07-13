@@ -43,6 +43,8 @@ public class SpxpProfileData {
 	
 	private Random rand;
 
+	private String profileUrl;
+
 	private String profileName;
 	
 	private String fullName;
@@ -91,6 +93,7 @@ public class SpxpProfileData {
 
 	public SpxpProfileData(
 			Random rand,
+			String baseUrl,
 			String profileName,
 			String fullName,
 			String about,
@@ -110,6 +113,7 @@ public class SpxpProfileData {
 			int targetFriendCount) {
 		this.rand = rand;
 		this.profileName = profileName;
+		this.profileUrl = baseUrl + profileName;
 		this.fullName = fullName;
 		this.about = about;
 		this.gender = gender;
@@ -148,6 +152,10 @@ public class SpxpProfileData {
 
 	public String getProfileName() {
 		return profileName;
+	}
+
+	public String getProfileUrl() {
+		return profileUrl;
 	}
 
 	public String getFullName() {
@@ -287,11 +295,11 @@ public class SpxpProfileData {
 		return d;
 	}
 
-	public void writeProfileFile(File profilesDir, String baseUrl) throws Exception {
+	public void writeProfileFile(File profilesDir) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		JSONObject profileObj = new JSONObject();
-		profileObj.put("endpoint", baseUrl+profileName);
+		profileObj.put("endpoint", profileUrl);
 		profileObj.put("key", CryptoTools.getECJWK(profileKeyId, profileKeyCurve, profileKeyPair));
 		JSONArray groupsArray = new JSONArray();
 		for(SpxpProfileGroupData grp : groups) {
@@ -326,6 +334,23 @@ public class SpxpProfileData {
 			}
 		}
 		profileObj.put("groupMemberships", groupMembershipsArray);
+		JSONArray userMembershipsArray = new JSONArray();
+		Iterator<SpxpFriendConnectionData> itFriendConnections = friendConnections.iterator();
+		while(itFriendConnections.hasNext()) {
+			SpxpFriendConnectionData friend = itFriendConnections.next();
+			JSONObject friendMembershipObj = new JSONObject();
+			friendMembershipObj.put("friend", friend.getPeerProfile().getProfileUrl());
+			JSONArray frindsGroupsArray = new JSONArray();
+			boolean[] groupMembership = friend.getGroupMembership();
+			for(int i = 0; i < groups.size(); i++) {
+				if(groupMembership[i]) {
+					frindsGroupsArray.put(groups.get(i).getGroupId());
+				}
+			}
+			friendMembershipObj.put("groups", frindsGroupsArray);
+			userMembershipsArray.put(friendMembershipObj);
+		}
+		profileObj.put("userMemberships", userMembershipsArray);
 		try( OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(profilesDir, profileName+".json")), StandardCharsets.UTF_8) ) {
 			profileObj.write(out, 4, 0);
 		}
@@ -451,14 +476,14 @@ public class SpxpProfileData {
 		return result;
 	}
 
-	public void writeSpxpFriends(File targetDir, String baseUrl) throws Exception {
+	public void writeSpxpFriends(File targetDir) throws Exception {
 		ArrayList<JSONArray> privateData = new ArrayList<>();
 		for(int i = 0; i < nonVirtualGroupsCount; i++) {
 			privateData.add(new JSONArray());
 		}
 		JSONArray friendsData = new JSONArray();
 		for(SpxpFriendConnectionData frindConnection : friendConnections) {
-			String friendUrl = baseUrl + frindConnection.getPeerProfile().getProfileName();
+			String friendUrl = frindConnection.getPeerProfile().getProfileUrl();
 			if(rand.nextInt(4) != 0) {
 				// 75% of friends connections are public
 				friendsData.put(friendUrl);

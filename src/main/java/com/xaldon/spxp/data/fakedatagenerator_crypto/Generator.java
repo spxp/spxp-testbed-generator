@@ -149,7 +149,7 @@ public class Generator {
 		ec_keypair_cache_out = new PrintWriter(new File("cache_ec_keypair_out.txt"), "UTF-8");
 		shared_secrets_cache_out = new PrintWriter(new File("cache_shared_secrets_out.txt"), "UTF-8");
 		System.out.println("Generating profiles and keys...");
-		List<SpxpProfileData> profiles = generateProfiles(500, 500);
+		List<SpxpProfileData> profiles = generateProfiles(BASE_URL, 500, 500);
 		System.out.println("Generating posts...");
 		generatePosts(profiles, 500, now);
 		System.out.println("Assigning friends and calculating shared secrets...");
@@ -163,9 +163,9 @@ public class Generator {
 		long start = System.currentTimeMillis();
 		int i = 0;
 		for(SpxpProfileData profile : profiles) {
-			profile.writeProfileFile(profilesDir, BASE_URL);
+			profile.writeProfileFile(profilesDir);
 			profile.writeSpxpProfile(targetDir, now, imageSourceDir);
-			profile.writeSpxpFriends(friendsDir, BASE_URL);
+			profile.writeSpxpFriends(friendsDir);
 			profile.writePosts(postsDir);
 			profile.writeSpxpKeys(keysDir, condensedRoundKeys);
 			System.out.print(".");
@@ -253,18 +253,18 @@ public class Generator {
 		System.out.println("Size of all keys files: "+sizeAllKeysFiles);
 	}
 
-	public List<SpxpProfileData> generateProfiles(int countFemale, int countMale) throws Exception {
+	public List<SpxpProfileData> generateProfiles(String baseUrl, int countFemale, int countMale) throws Exception {
 		ArrayList<SpxpProfileData> result = new ArrayList<SpxpProfileData>(countFemale+countMale);
 		HashSet<String> uniqueNameCheck = new HashSet<String>(countFemale+countMale);
-		generateProfilesPerGender(result, uniqueNameCheck, "female", countFemale);
-		generateProfilesPerGender(result, uniqueNameCheck, "male", countMale);
+		generateProfilesPerGender(result, uniqueNameCheck, baseUrl, "female", countFemale);
+		generateProfilesPerGender(result, uniqueNameCheck, baseUrl, "male", countMale);
 		return result;
 	}
 	
-	public void generateProfilesPerGender(ArrayList<SpxpProfileData> result, HashSet<String> uniqueNameCheck, String gender, int count) throws Exception {
+	public void generateProfilesPerGender(ArrayList<SpxpProfileData> result, HashSet<String> uniqueNameCheck, String baseUrl, String gender, int count) throws Exception {
 		JSONArray randomUsers = getRandomUsers(gender, count);
 		for(int i = 0; i < count; i++) {
-			SpxpProfileData newProfile = generateSingleProfile(randomUsers.getJSONObject(i), i, gender);
+			SpxpProfileData newProfile = generateSingleProfile(baseUrl, randomUsers.getJSONObject(i), i, gender);
 			if(uniqueNameCheck.contains(newProfile.getProfileName().toLowerCase())) {
 				throw new RuntimeException("duplicate profile name: " + newProfile.getProfileName());
 			}
@@ -290,7 +290,7 @@ public class Generator {
 		return result;
 	}
 	
-	public SpxpProfileData generateSingleProfile(JSONObject obj, int id, String gender) throws Exception {
+	public SpxpProfileData generateSingleProfile(String baseUrl, JSONObject obj, int id, String gender) throws Exception {
 		JSONObject nameObj = obj.getJSONObject("name");
 		String fullName = Tools.uppercaseFirstChar(nameObj.getString("first")) + " " + Tools.uppercaseFirstChar(nameObj.getString("last"));
 		JSONObject loginObj = obj.getJSONObject("login");
@@ -329,7 +329,7 @@ public class Generator {
 		// a better solution would be a weibul distribution modelled after
 		// https://blog.stephenwolfram.com/2013/04/data-science-of-the-facebook-world/
 		int targetFriendCount = (int)Math.round(nextCompressedGaussianRand()*200d + 300d);
-		return new SpxpProfileData(rand, profileName, fullName, about, gender, email, birthDayAndMonth, birthYear, hometown, location, latitude, longitude, profilePhoto, profileKeyPair, "key-"+profileName, EC_CURVE_SPEC, groupData, targetFriendCount);
+		return new SpxpProfileData(rand, baseUrl, profileName, fullName, about, gender, email, birthDayAndMonth, birthYear, hometown, location, latitude, longitude, profilePhoto, profileKeyPair, "key-"+profileName, EC_CURVE_SPEC, groupData, targetFriendCount);
 	}
 	
 	private void generateRoundKeys(List<SpxpProfileData> profiles, Date now, int defaultPeriodLength, int unfriendEventsPerPeriod) throws Exception {
