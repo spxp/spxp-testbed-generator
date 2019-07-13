@@ -461,18 +461,6 @@ public class SpxpProfileData {
 		result.put("tag", Base64UrlUtility.encode(tag));
 		result.put("enc", "A256GCM");
 		result.put("url", "images_enc/"+profileName+".encrypted");
-		// debug encrypted with tag at the end
-		c = Cipher.getInstance(algorithm);
-		c.init(Cipher.ENCRYPT_MODE, secretKey, algoParamSpec);
-		try(FileInputStream in = new FileInputStream(new File(imageSourceDir, profilePhoto))) {
-			try(CipherOutputStream o = new CipherOutputStream(new FileOutputStream(new File(targetDir, "images_enc/"+profileName+".encrypted.debug")),c)) {
-				try {
-					Tools.copyStreams(in, o);
-				} finally {
-					o.close();
-				}
-			}
-		}
 		return result;
 	}
 
