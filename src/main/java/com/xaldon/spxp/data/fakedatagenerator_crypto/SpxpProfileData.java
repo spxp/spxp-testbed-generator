@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -220,7 +221,7 @@ public class SpxpProfileData {
 	public void extendGroupsByVirtualGroups(int basedOnGroup, int additionalGroupCount) {
 		SpxpProfileGroupData base = groups.get(basedOnGroup);
 		for(int i = 0; i < additionalGroupCount; i++) {
-			groups.add(new SpxpProfileGroupData(base.getDisplayName()+" (virt "+i+")", base.getSymmetricGroupKeyId()+"-virt_"+i, true));
+			groups.add(new SpxpProfileGroupData(base.getDisplayName()+" (virt "+i+")", base.getGroupId()+"-virt_"+i, true));
 		}
 		for(SpxpFriendConnectionData fcd : friendConnections) {
 			fcd.extendGroupsTo(groups.size());
@@ -288,6 +289,7 @@ public class SpxpProfileData {
 
 	public void writeProfileFile(File profilesDir, String baseUrl) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		JSONObject profileObj = new JSONObject();
 		profileObj.put("endpoint", baseUrl+profileName);
 		profileObj.put("key", CryptoTools.getECJWK(profileKeyId, profileKeyCurve, profileKeyPair));
@@ -295,19 +297,35 @@ public class SpxpProfileData {
 		for(SpxpProfileGroupData grp : groups) {
 			JSONObject groupObj = new JSONObject();
 			groupObj.put("displayName", grp.getDisplayName());
-			groupObj.put("symmetricGroupKeyId", grp.getSymmetricGroupKeyId());
+			groupObj.put("groupId", grp.getGroupId());
+			groupObj.put("virtual", grp.isVirtual());
 			JSONArray roundKeys = new JSONArray();
 			for(SpxpRoundKey rk : grp.getRoundKeys()) {
 				JSONObject roundKey = new JSONObject();
+				roundKey.put("roundId", rk.getRoundId());
 				roundKey.put("validSince", sdf.format(rk.getValidSince()));
 				roundKey.put("validBefore", sdf.format(rk.getValidBefore()));
-				roundKey.put("symmetricKey", rk.getRoundKeySilent().getJWK());
+				roundKey.put("key", rk.getRoundKeySilent().getJWK());
 				roundKeys.put(roundKey);
 			}
 			groupObj.put("roundKeys", roundKeys);
 			groupsArray.put(groupObj);
 		}
 		profileObj.put("groups", groupsArray);
+		JSONArray groupMembershipsArray = new JSONArray();
+		for(int i = 0; i < groups.size(); i++) {
+			String groupId = groups.get(i).getGroupId();
+			List<Integer> memberOf = groupInGroupMemberships.get(i);
+			if(memberOf != null) {
+				for(int g : memberOf) {
+					JSONObject membershipObj = new JSONObject();
+					membershipObj.put("groupId", groupId);
+					membershipObj.put("memberOf", groups.get(g).getGroupId());
+					groupMembershipsArray.put(membershipObj);
+				}
+			}
+		}
+		profileObj.put("groupMemberships", groupMembershipsArray);
 		try( OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(profilesDir, profileName+".json")), StandardCharsets.UTF_8) ) {
 			profileObj.write(out, 4, 0);
 		}
@@ -495,14 +513,14 @@ public class SpxpProfileData {
 				if(!condensed) {
 					out.print("    ");
 				}
-				out.println("\""+groups.get(i).getSymmetricGroupKeyId()+"\": {");
+				out.println("\""+groups.get(i).getGroupId()+"\": {");
 				Iterator<Integer> it = memberOf.iterator();
 				while(it.hasNext()) {
 					int g = it.next();
 					if(!condensed) {
 						out.print("        ");
 					}
-					out.print("\""+groups.get(g).getSymmetricGroupKeyId()+"\": {");
+					out.print("\""+groups.get(g).getGroupId()+"\": {");
 					boolean f2 = true;
 					for(SpxpRoundKey rk : groups.get(g).getRoundKeys()) {
 						if(rk.getKeyUsage() <= 0) {
@@ -561,7 +579,7 @@ public class SpxpProfileData {
 						if(!condensed) {
 							out.print("        ");
 						}
-						out.print("\""+groups.get(i).getSymmetricGroupKeyId()+"\": {");
+						out.print("\""+groups.get(i).getGroupId()+"\": {");
 						boolean f2 = true;
 						for(SpxpRoundKey rk : groups.get(i).getRoundKeys()) {
 							if(rk.getKeyUsage() <= 0) {

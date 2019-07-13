@@ -12,7 +12,7 @@ public class SpxpProfileGroupData {
 	
 	private String displayName;
 	
-	private String symmetricGroupKeyId;
+	private String groupId;
 	
 	private boolean virtual;
 	
@@ -20,7 +20,7 @@ public class SpxpProfileGroupData {
 
 	public SpxpProfileGroupData(String displayName, String symmetricGroupKeyId, boolean virtual) {
 		this.displayName = displayName;
-		this.symmetricGroupKeyId = symmetricGroupKeyId;
+		this.groupId = symmetricGroupKeyId;
 		this.virtual = virtual;
 	}
 
@@ -28,8 +28,8 @@ public class SpxpProfileGroupData {
 		return displayName;
 	}
 
-	public String getSymmetricGroupKeyId() {
-		return symmetricGroupKeyId;
+	public String getGroupId() {
+		return groupId;
 	}
 	
 	public boolean isVirtual() {
@@ -37,7 +37,9 @@ public class SpxpProfileGroupData {
 	}
 	
 	public void generateRoundKeyForPeriod(long validSince, long validBefore) {
-		roundKeys.add(new SpxpRoundKey(validSince, validBefore, new SpxpSymmetricKeySpec(symmetricGroupKeyId+"."+CryptoTools.generateRandomKeyId(false), CryptoTools.generateSymmetricKey(256))));
+		String roundId = CryptoTools.generateRandomKeyId(false);
+		String keyId = groupId+"."+roundId;
+		roundKeys.add(new SpxpRoundKey(roundId, validSince, validBefore, new SpxpSymmetricKeySpec(keyId, CryptoTools.generateSymmetricKey(256))));
 	}
 	
 	public List<SpxpRoundKey> getRoundKeys() {
