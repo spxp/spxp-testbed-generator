@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.spxp.crypto.SpxpCryptoTools;
+import org.spxp.crypto.SpxpSymmetricKeySpec;
+
 public class SpxpProfileGroupData {
 	
 	private String displayName;
@@ -37,9 +40,9 @@ public class SpxpProfileGroupData {
 	}
 	
 	public void generateRoundKeyForPeriod(long validSince, long validBefore) {
-		String roundId = CryptoTools.generateRandomKeyId(false);
+		String roundId = SpxpCryptoTools.generateRandomKeyId(false);
 		String keyId = groupId+"."+roundId;
-		roundKeys.add(new SpxpRoundKey(roundId, validSince, validBefore, new SpxpSymmetricKeySpec(keyId, CryptoTools.generateSymmetricKey(256))));
+		roundKeys.add(new SpxpRoundKey(roundId, validSince, validBefore, new SpxpSymmetricKeySpec(keyId, SpxpCryptoTools.generateSymmetricKey(256))));
 	}
 	
 	public List<SpxpRoundKey> getRoundKeys() {

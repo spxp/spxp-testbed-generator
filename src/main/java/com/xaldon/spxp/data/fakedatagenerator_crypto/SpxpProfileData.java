@@ -36,6 +36,7 @@ import org.apache.cxf.common.util.Base64UrlUtility;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.spxp.crypto.SpxpCryptoTools;
+import org.spxp.crypto.SpxpSymmetricKeySpec;
 
 import com.xaldon.spxp.data.fakedatagenerator.Tools;
 
@@ -313,7 +314,7 @@ public class SpxpProfileData {
 				roundKey.put("roundId", rk.getRoundId());
 				roundKey.put("validSince", sdf.format(rk.getValidSince()));
 				roundKey.put("validBefore", sdf.format(rk.getValidBefore()));
-				roundKey.put("key", rk.getRoundKeySilent().getJWK());
+				roundKey.put("key", rk.getRoundKeyJwkSilent());
 				roundKeys.put(roundKey);
 			}
 			groupObj.put("roundKeys", roundKeys);
@@ -433,7 +434,7 @@ public class SpxpProfileData {
 		keyGen.init(keyLength);
 		SecretKey secretKey = keyGen.generateKey();
 		// IV
-		byte[] iv = CryptoTools.generateSymmetricKey(ivLength);
+		byte[] iv = SpxpCryptoTools.generateSymmetricKey(ivLength);
 		// algo params
 		AlgorithmParameterSpec algoParamSpec = new GCMParameterSpec(authTagLength, iv);
 		// Cipher
@@ -544,14 +545,13 @@ public class SpxpProfileData {
 						}
 						f2 = false;
 						out.println();
-						SpxpSymmetricKeySpec keySpec = rk.getRoundKeySilent();
-						String jwkString = keySpec.getJWK();
+						String jwkString = rk.getRoundKeyJwkSilent();
 						SpxpSymmetricKeySpec ks = groups.get(i).getRoundKeyForTime(new Date(rk.getValidSince())).getRoundKey();
 						String encryptedSymmetricKey = SpxpCryptoTools.encryptSymmetricCompact(jwkString, ks.getKeyId(), ks.getSymmetricKey());
 						if(!condensed) {
 							out.print("            ");
 						}
-						String kid = keySpec.getKeyId();
+						String kid = rk.getRoundKeySilent().getKeyId();
 						if(condensed) {
 							String[] parts = kid.split("\\.");
 							kid = parts[1];
@@ -603,8 +603,7 @@ public class SpxpProfileData {
 							}
 							f2 = false;
 							out.println();
-							SpxpSymmetricKeySpec keySpec = rk.getRoundKeySilent();
-							String jwkString = keySpec.getJWK();
+							String jwkString = rk.getRoundKeyJwkSilent();
 							String encryptedSymmetricKey = SpxpCryptoTools.encryptWithSharedSecret(jwkString, friend.getSharedSecret());
 							if(condensed) {
 								String[] parts = encryptedSymmetricKey.split("\\.");
@@ -613,7 +612,7 @@ public class SpxpProfileData {
 							if(!condensed) {
 								out.print("            ");
 							}
-							String kid = keySpec.getKeyId();
+							String kid = rk.getRoundKeySilent().getKeyId();
 							if(condensed) {
 								String[] parts = kid.split("\\.");
 								kid = parts[1];
@@ -738,7 +737,7 @@ public class SpxpProfileData {
 		sb.append(obj.getString("message"));
 		obj.put("message", sb.toString());
 		JSONArray privateArray = new JSONArray();
-		privateArray.put(CryptoTools.encryptSymmetricJson(obj, result.getString("timestampUTC"), receipients));
+		privateArray.put(new JSONObject(SpxpCryptoTools.encryptSymmetricJson(obj.toString(), result.getString("timestampUTC"), receipients)));
 		result.put("private", privateArray);
 		return result;
 	}

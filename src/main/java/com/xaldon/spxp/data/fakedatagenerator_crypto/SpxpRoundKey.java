@@ -1,5 +1,7 @@
 package com.xaldon.spxp.data.fakedatagenerator_crypto;
 
+import org.spxp.crypto.SpxpSymmetricKeySpec;
+
 public class SpxpRoundKey {
 
 	private final String roundId;
@@ -9,6 +11,8 @@ public class SpxpRoundKey {
 	private final long validBefore;
 	
 	private final SpxpSymmetricKeySpec roundKey;
+	
+	private String roundKeyJwk;
 	
 	private int keyUsage;
 
@@ -40,6 +44,13 @@ public class SpxpRoundKey {
 
 	public SpxpSymmetricKeySpec getRoundKeySilent() {
 		return roundKey;
+	}
+
+	public String getRoundKeyJwkSilent() {
+		if(roundKeyJwk == null) {
+			roundKeyJwk = CryptoTools.getSymJWK(roundKey, "A256GCM").toString();
+		}
+		return roundKeyJwk;
 	}
 
 	public int getKeyUsage() {

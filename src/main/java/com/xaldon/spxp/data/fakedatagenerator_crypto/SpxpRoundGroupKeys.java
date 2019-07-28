@@ -1,5 +1,7 @@
 package com.xaldon.spxp.data.fakedatagenerator_crypto;
 
+import org.spxp.crypto.SpxpSymmetricKeySpec;
+
 public class SpxpRoundGroupKeys {
 
 	private final long validSince;
