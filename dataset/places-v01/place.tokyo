@@ -1,0 +1,11 @@
+{
+    "ver" : "0.1",
+    "name" : "Tokyo",
+    "about" : "The capital of Japan.",
+    "website" : "https://www.metro.tokyo.lg.jp/english/",
+    "coordinates" : {
+        "latitude" : "35.689722",
+        "longitude" : "139.692222"
+    },
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Skyscrapers_of_Shinjuku_2009_January.jpg/640px-Skyscrapers_of_Shinjuku_2009_January.jpg",
+}

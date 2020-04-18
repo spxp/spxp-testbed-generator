@@ -1,0 +1,10 @@
+http://testbed.spxp.org/0.1/place.berlin
+http://testbed.spxp.org/0.1/place.london
+http://testbed.spxp.org/0.1/place.paris
+http://testbed.spxp.org/0.1/place.tokyo
+http://testbed.spxp.org/0.1/place.bejin
+http://testbed.spxp.org/0.1/place.new.york
+http://testbed.spxp.org/0.1/place.moscow
+http://testbed.spxp.org/0.1/place.rome
+http://testbed.spxp.org/0.1/place.wuerzburg
+http://testbed.spxp.org/0.1/place.madrid

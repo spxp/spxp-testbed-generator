@@ -1,0 +1,11 @@
+{
+    "ver" : "0.1",
+    "name" : "New York City",
+    "about" : "The most populous city in the United States.",
+    "website" : "https://www.nyc.gov/",
+    "coordinates" : {
+        "latitude" : "40.661",
+        "longitude" : "-73.944"
+    },
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Lower_Manhattan_skyline_-_June_2017.jpg/640px-Lower_Manhattan_skyline_-_June_2017.jpg",
+}

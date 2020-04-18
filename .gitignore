@@ -2,8 +2,7 @@
 /.classpath
 /.settings
 /target
-/crypto_profiles
-/crypto_spxp
-/profiles
-/spxp
-/statistics.txt
+/profile_images
+/v0.1
+/v0.2
+/v0.3

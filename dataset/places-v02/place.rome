@@ -1,0 +1,11 @@
+{
+    "ver" : "0.2",
+    "name" : "Rome",
+    "about" : "The capital city and a special comune of Italy.",
+    "website" : "https://www.comune.roma.it/web/it/home.page",
+    "coordinates" : {
+        "latitude" : "41.883333",
+        "longitude" : "12.5"
+    },
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Sant%27Angelo_bridge%2C_dusk%2C_Rome%2C_Italy.jpg/640px-Sant%27Angelo_bridge%2C_dusk%2C_Rome%2C_Italy.jpg",
+}
