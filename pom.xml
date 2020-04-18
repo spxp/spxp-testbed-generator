@@ -2,7 +2,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.xaldon.spxp.data</groupId>
-  <artifactId>spxp-fake-data-generator</artifactId>
+  <artifactId>spxp-test-data-generator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
   <dependencies>
