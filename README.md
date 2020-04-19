@@ -1,4 +1,4 @@
-# SPXP Profile Generator
+# SPXP Test Profile Generator
 This tool generates random SPXP profiles for different versions of the SPXP
 protocol. It takes statistical properties of existing social networks into
 account to generate a realistic representation of real profiles.  
@@ -37,7 +37,7 @@ files in the local folder `./v0.1`.
 4. Copy the pre-created city profiles from `./dataset/places-v01` to `./v0.1`
 
 The behavior as well as the base URL can be adopted by changing some
-[constants](./src/main/java/com/xaldon/spxp/profilegen/v01/GeneratorV01.java#L26)
+[constants](./src/main/java/com/xaldon/spxp/profilegen/v01/GeneratorV01.java#L21)
 at the top of this file.
 
 
@@ -54,7 +54,7 @@ files in the local folder `./v0.2`.
 4. Copy the pre-created city profiles from `./dataset/places-v02` to `./v0.2`
 
 The behavior as well as the base URL can be adopted by changing some
-[constants](./src/main/java/com/xaldon/spxp/profilegen/v02/GeneratorV02.java#L26)
+[constants](./src/main/java/com/xaldon/spxp/profilegen/v02/GeneratorV02.java#L42)
 at the top of this file.  
 Generating EC keys for the curve P-256 and calculating the ECDH shared secret
 between two such keys is quite computational heavy. The generator tool writes
