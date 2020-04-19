@@ -294,7 +294,7 @@ public class GeneratorV02 {
 		}
 		try( OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(targetDir, "index.html")), StandardCharsets.UTF_8) ) {
 			out.write("<html>\n");
-			out.write("<head><meta charset=\"utf-8\"/><title>Testbed of SPXP profiles of version 0.1</title></head>\n");
+			out.write("<head><meta charset=\"utf-8\"/><title>Testbed of SPXP profiles of version 0.2</title></head>\n");
 			out.write("<body>\n");
 			out.write("<h1>Testbed of SPXP profiles of version 0.2</h1>\n");
 			for(SpxpProfileData profile : profiles) {
