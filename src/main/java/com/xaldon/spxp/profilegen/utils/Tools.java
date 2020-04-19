@@ -178,4 +178,20 @@ public class Tools {
 		}
 	}
 
+	public static String cleanMessage(String in) {
+		int p = in.lastIndexOf(" ");
+		if(p > 0) {
+			p = in.lastIndexOf(" ", p-1);
+		}
+		if(p >= 0) {
+			in = in.substring(0, p);
+		}
+		in = in.trim();
+		String test = in.toLowerCase();
+		if(test.contains("http://") || test.contains("https://")) {
+			return null;
+		}
+		return in;
+	}
+
 }

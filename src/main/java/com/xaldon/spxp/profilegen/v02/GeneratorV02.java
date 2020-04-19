@@ -662,7 +662,7 @@ public class GeneratorV02 {
 		try(Scanner s = new Scanner(new File("dataset/sample-text-post-messages.txt")/*, "UTF-8"*/)) {
 			s.useDelimiter("\\r\\n|\\n");
 			while(s.hasNext()) {
-				String x = cleanMessage(s.next());
+				String x = Tools.cleanMessage(s.next());
 				if(x != null) {
 					sampleTextPostMessages.add(x);
 				}
@@ -713,22 +713,6 @@ public class GeneratorV02 {
 				}
 			}
 		}
-	}
-
-	private String cleanMessage(String in) {
-		int p = in.lastIndexOf(" ");
-		if(p > 0) {
-			p = in.lastIndexOf(" ", p-1);
-		}
-		if(p >= 0) {
-			in = in.substring(0, p);
-		}
-		in = in.trim();
-		String test = in.toLowerCase();
-		if(test.contains("http://") || test.contains("https://")) {
-			return null;
-		}
-		return in;
 	}
 	
 	public JSONArray getRandomUsers(String gender, int count) throws Exception {
