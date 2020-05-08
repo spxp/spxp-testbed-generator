@@ -1,0 +1,11 @@
+{
+    "ver" : "0.3",
+    "name" : "Madrid",
+    "about" : "The capital and most populous city of Spain",
+    "website" : "http://madrid.es/",
+    "coordinates" : {
+        "latitude" : "40.383333",
+        "longitude" : "-3.716667"
+    },
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Gran_V%C3%ADa_%28Madrid%29_1.jpg/640px-Gran_V%C3%ADa_%28Madrid%29_1.jpg",
+}

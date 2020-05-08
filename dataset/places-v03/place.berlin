@@ -1,0 +1,11 @@
+{
+    "ver" : "0.3",
+    "name" : "Berlin",
+    "about" : "The capital and largest city of Germany by both area and population.",
+    "website" : "https://www.berlin.de/en/",
+    "coordinates" : {
+        "latitude" : "52.52",
+        "longitude" : "13.405"
+    },
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Brandenburger_Tor_abends.jpg/640px-Brandenburger_Tor_abends.jpg",
+}

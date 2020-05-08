@@ -167,6 +167,18 @@ public class Tools {
 		return jsonObject;
 	}
 	
+	public static JSONObject orderObject(JSONObject in, String[] keys) {
+		JSONObject result = newOrderPreservingJSONObject();
+		for(String key : keys) {
+			result.put(key, in.get(key));
+			in.remove(key);
+		}
+		if(!in.isEmpty()) {
+			throw new IllegalArgumentException("JSONObject contains more members than expected");
+		}
+		return result;
+	}
+	
 	public static void makeJSONObjectOrderPreserving(JSONObject jsonObject) {
 		try {
 			Field map = jsonObject.getClass().getDeclaredField("map");

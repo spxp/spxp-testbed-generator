@@ -1,0 +1,11 @@
+{
+    "ver" : "0.3",
+    "name" : "Bejin",
+    "about" : "The capital of the People's Republic of China.",
+    "website" : "http://www.ebeijing.gov.cn/",
+    "coordinates" : {
+        "latitude" : "39.916667",
+        "longitude" : "116.383333"
+    },
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/National_Centre_for_the_Performing_Arts_and_Great_Hall_of_the_People.jpg/640px-National_Centre_for_the_Performing_Arts_and_Great_Hall_of_the_People.jpg",
+}
