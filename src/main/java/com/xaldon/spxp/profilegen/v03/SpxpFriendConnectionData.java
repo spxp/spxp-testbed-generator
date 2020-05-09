@@ -2,6 +2,7 @@ package com.xaldon.spxp.profilegen.v03;
 
 import java.util.Arrays;
 
+import org.json.JSONObject;
 import org.spxp.crypto.SpxpSymmetricKeySpec;
 
 public class SpxpFriendConnectionData {
@@ -10,12 +11,15 @@ public class SpxpFriendConnectionData {
 	
 	private boolean[] groupMembership;
 	
-	private SpxpSymmetricKeySpec readerKey;
+	private SpxpSymmetricKeySpec issuedReaderKey;
+	
+	private JSONObject issuedCertificate;
 
-	public SpxpFriendConnectionData(SpxpProfileData peerProfile, boolean[] groupMembership, SpxpSymmetricKeySpec readerKey) {
+	public SpxpFriendConnectionData(SpxpProfileData peerProfile, boolean[] groupMembership, SpxpSymmetricKeySpec issuedReaderKey, JSONObject issuedCertificate) {
 		this.peerProfile = peerProfile;
 		this.groupMembership = groupMembership;
-		this.readerKey = readerKey;
+		this.issuedReaderKey = issuedReaderKey;
+		this.issuedCertificate = issuedCertificate;
 	}
 
 	public SpxpProfileData getPeerProfile() {
@@ -26,8 +30,12 @@ public class SpxpFriendConnectionData {
 		return groupMembership;
 	}
 	
-	public SpxpSymmetricKeySpec getReaderKey() {
-		return readerKey;
+	public SpxpSymmetricKeySpec getIssuedReaderKey() {
+		return issuedReaderKey;
+	}
+	
+	public JSONObject getIssuedCertificate() {
+		return issuedCertificate;
 	}
 
 	public void extendGroupsTo(int size) {

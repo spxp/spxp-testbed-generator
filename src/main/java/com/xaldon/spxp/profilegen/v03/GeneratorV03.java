@@ -101,7 +101,7 @@ public class GeneratorV03 {
 		if(!encryptedImagesDir.exists()) {
 			encryptedImagesDir.mkdirs();
 		}
-		System.out.println("Generating profiles and keys...");
+		System.out.println("Generating profiles and profile KeyPairs...");
 		List<SpxpProfileData> profiles = generateProfiles(PROFILE_ROOT_URL, GENERATED_PROFILES_COUNT/2, GENERATED_PROFILES_COUNT/2);
 		System.out.println("Generating posts...");
 		generatePosts(profiles, POSTS_PER_PROFILE_COUNT, now);
@@ -120,7 +120,7 @@ public class GeneratorV03 {
 			profile.writeSpxpProfile(targetDir, imageSourceDir);
 			profile.writeSpxpFriends(friendsDir);
 			profile.writePosts(postsDir);
-			//profile.writeSpxpKeys(keysDir);
+			profile.writeSpxpKeys(keysDir);
 			System.out.print(".");
 			i++;
 			if(i % 50 == 0) {
@@ -133,7 +133,7 @@ public class GeneratorV03 {
 		long end = System.currentTimeMillis();
 		long duration = (end - start) / 1000;
 		Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_read-posts.php", new File(postsDir, "_read-posts.php"));
-		//Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_read-keys.php", new File(keysDir, "_read-keys.php"));
+		Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_read-keys.php", new File(keysDir, "_read-keys.php"));
 		System.out.println("writing all files took "+duration+"sec");
 		if(GENERATE_QR_CODES) {
 			System.out.println("Generating QR codes...");
@@ -334,7 +334,7 @@ public class GeneratorV03 {
 			}
 			int missingFriendCount = next.getTargetFriendCount() - next.getActualFriendCount();
 			if(missingFriendCount >= candidates.size()) {
-				//System.out.println("Insufficient friend candidates for "+next.getProfileName()+". Needed "+missingFriendCount+" new friends, but got only "+candidates.size()+" candidates.");
+				// System.out.println("Insufficient friend candidates for "+next.getProfileName()+". Needed "+missingFriendCount+" new friends, but got only "+candidates.size()+" candidates.");
 				// add all candidates
 				for(SpxpProfileData pd : candidates) {
 					makeFriendConnection(next, pd);

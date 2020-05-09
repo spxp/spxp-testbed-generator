@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,16 +80,13 @@ public class SpxpProfileData {
 	private ArrayList<SpxpProfileImpersonationKey> extraPostSigningImpersonationKeys = new ArrayList<>();
 	
 	private ArrayList<SpxpProfileImpersonationKey> extraFriendsSigningImpersonationKeys = new ArrayList<>();
-	
-	private LinkedList<IssuedCertificateData> issuedCertificates = new LinkedList<>();
 
-	private HashMap<String, JSONObject> grantedCertificates = new HashMap<>();
-	
-	private class IssuedCertificateData {
-		public String profileUri;
-		public SpxpProfileKeyPair publicKey;
-		public JSONObject certificate;
+	private class PeerConnectionData {
+		SpxpSymmetricKeySpec readerKey;
+		JSONObject certificate;
 	}
+	
+	private HashMap<String, PeerConnectionData> peerConnectionData = new HashMap<>();
 
 	public SpxpProfileData(
 			Random rand,
@@ -292,28 +290,27 @@ public class SpxpProfileData {
 		// create reader key for peer profile
 		byte[] readerKey = SpxpCryptoToolsV03.generateSymmetricKey(256);
 		String readerKid = profileName+"-readerkey-for-"+peer.getProfileName();
-		SpxpSymmetricKeySpec readerKeySpec = new SpxpSymmetricKeySpec(readerKid, readerKey);
+		SpxpSymmetricKeySpec issuedReaderKeySpec = new SpxpSymmetricKeySpec(readerKid, readerKey);
 		// grant publishing permissions to own posts with 75% probability
+		JSONObject issuedCertificate = null;
 		if(rand.nextInt(4) > 0) {
 			SpxpCertificatePermission[] pcPermissions = new SpxpCertificatePermission[] {
 					SpxpCertificatePermission.POST,
 					SpxpCertificatePermission.COMMENT };
-			JSONObject peerCertificate = CryptoTools.createCertificate(peer.getProfileKeyPair(), pcPermissions, profileKeyPair, null);
-			IssuedCertificateData icd = new IssuedCertificateData();
-			icd.profileUri = peer.getProfileUri();
-			icd.publicKey = peer.getProfileKeyPair();
-			icd.certificate = peerCertificate;
-			issuedCertificates.add(icd);
-			peer.provideCertificate(this.profileUri, peerCertificate);
+			issuedCertificate = CryptoTools.createCertificate(peer.getProfileKeyPair(), pcPermissions, profileKeyPair, null);
 		}
 		// add new friend connection to list of friends
-		friendConnections.add(new SpxpFriendConnectionData(peer, groupMembership, readerKeySpec));
+		peer.provideConnectionData(this.profileUri, issuedReaderKeySpec, issuedCertificate);
+		friendConnections.add(new SpxpFriendConnectionData(peer, groupMembership, issuedReaderKeySpec, issuedCertificate));
 		connectedProfilesSet.add(peer);
 		actualFriendCount++;
 	}
 	
-	public void provideCertificate(String peerProfileUri, JSONObject myCertificate) {
-		this.grantedCertificates .put(peerProfileUri, myCertificate);
+	public void provideConnectionData(String peerProfileUri, SpxpSymmetricKeySpec readerKey, JSONObject certificate) {
+		PeerConnectionData pcd = new PeerConnectionData();
+		pcd.readerKey = readerKey;
+		pcd.certificate = certificate;
+		this.peerConnectionData.put(peerProfileUri, pcd);
 	}
 
 	public SpxpFriendConnectionData getFriendConnectionData(int i) {
@@ -348,8 +345,9 @@ public class SpxpProfileData {
 
 	public void writePrivateData(File profilesDir) throws Exception {
 		JSONObject profileObj = Tools.newOrderPreservingJSONObject();
+		// basics
 		profileObj.put("profileUri", profileUri);
-		profileObj.put("key", CryptoTools.getOrderedKeypairJWK(profileKeyPair));
+		profileObj.put("profileKeyPair", CryptoTools.getOrderedKeypairJWK(profileKeyPair));
 		// impersonationKeys
 		JSONArray impersonationKeysArray = new JSONArray();
 		for(SpxpProfileImpersonationKey pik : allImpersonationKeys) {
@@ -359,16 +357,6 @@ public class SpxpProfileData {
 			impersonationKeysArray.put(pikObj);
 		}
 		profileObj.put("impersonationKeys", impersonationKeysArray);
-		// issued certificates
-		JSONArray issuedCertificatesArray = new JSONArray();
-		for(IssuedCertificateData icd : issuedCertificates) {
-			JSONObject icdObj = Tools.newOrderPreservingJSONObject();
-			icdObj.put("profileUri", icd.profileUri);
-			icdObj.put("publicKey", CryptoTools.getOrderedPublicJWK(icd.publicKey));
-			icdObj.put("certificate", icd.certificate);
-			issuedCertificatesArray.put(icdObj);
-		}
-		profileObj.put("issuedCertificates", issuedCertificatesArray);
 		// connections
 		JSONArray connectionsArray = new JSONArray();
 		Iterator<SpxpFriendConnectionData> itFriendConnections = friendConnections.iterator();
@@ -376,10 +364,14 @@ public class SpxpProfileData {
 			SpxpFriendConnectionData friend = itFriendConnections.next();
 			JSONObject connectionObj = Tools.newOrderPreservingJSONObject();
 			connectionObj.put("profileUri", friend.getPeerProfile().getProfileUri());
-			connectionObj.put("readerKey", CryptoTools.getOrderedSymmetricJWK(friend.getReaderKey()).toString());
-			JSONObject grantedCert = grantedCertificates.get(friend.getPeerProfile().getProfileUri());
-			if(grantedCert != null) {
-				connectionObj.put("grantedCertificate", grantedCert);
+			connectionObj.put("issuedReaderKey", CryptoTools.getOrderedSymmetricJWK(friend.getIssuedReaderKey()));
+			if(friend.getIssuedCertificate() != null) {
+				connectionObj.put("issuedCertificate", friend.getIssuedCertificate());
+			}
+			PeerConnectionData pcd = peerConnectionData.get(friend.getPeerProfile().getProfileUri());
+			connectionObj.put("grantedReaderKey", CryptoTools.getOrderedSymmetricJWK(pcd.readerKey));
+			if(pcd.certificate != null) {
+				connectionObj.put("grantedCertificate", pcd.certificate);
 			}
 			JSONArray connectionGroupsArray = new JSONArray();
 			boolean[] groupMembership = friend.getGroupMembership();
@@ -579,25 +571,26 @@ public class SpxpProfileData {
 	}
 
 	// total 906sec
-	/*
 	public void writeSpxpKeys(File targetDir) throws Exception {
 		try( PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(targetDir, profileName)), StandardCharsets.UTF_8) ) ) {
 			out.println("{");
 			// groups
-			for(int i = 0; i < groups.size(); i++) {
-				List<Integer> memberOf = groupInGroupMemberships.get(i);
+			for(int iGroups = 0; iGroups < groups.size(); iGroups++) {
+				List<Integer> memberOf = groupInGroupMemberships.get(iGroups);
+				SpxpProfileGroupData group = groups.get(iGroups);
 				if(memberOf == null || memberOf.isEmpty()) {
 					continue;
 				}
 				out.print("    ");
-				out.println("\""+groups.get(i).getGroupId()+"\": {");
+				out.println("\""+group.getGroupId()+"\": {");
 				Iterator<Integer> it = memberOf.iterator();
 				while(it.hasNext()) {
-					int g = it.next();
+					int memberOfGroupIdx = it.next();
+					SpxpProfileGroupData memberOfGroup = groups.get(memberOfGroupIdx);
 					out.print("        ");
-					out.print("\""+groups.get(g).getGroupId()+"\": {");
+					out.print("\""+memberOfGroup.getGroupId()+"\": {");
 					boolean f2 = true;
-					for(SpxpRoundKey rk : groups.get(g).getRoundKeys()) {
+					for(SpxpRoundKey rk : memberOfGroup.getRoundKeys()) {
 						if(rk.getKeyUsage() <= 0) {
 							continue;
 						}
@@ -607,7 +600,7 @@ public class SpxpProfileData {
 						f2 = false;
 						out.println();
 						String jwkString = rk.getRoundKeyJwkSilent();
-						SpxpSymmetricKeySpec ks = groups.get(i).getRoundKeyForTime(new Date(rk.getValidSince())).getRoundKey();
+						SpxpSymmetricKeySpec ks = group.getRoundKeyForTime(new Date(rk.getValidSince())).getRoundKey();
 						String encryptedSymmetricKey = SpxpCryptoToolsV03.encryptSymmetricCompact(jwkString, ks);
 						out.print("            ");
 						String kid = rk.getRoundKeySilent().getKeyId();
@@ -626,12 +619,12 @@ public class SpxpProfileData {
 				out.print("    ");
 				out.println("},");
 			}
-			// friends
+			// connections
 			Iterator<SpxpFriendConnectionData> itFriendConnections = friendConnections.iterator();
 			while(itFriendConnections.hasNext()) {
 				SpxpFriendConnectionData friend = itFriendConnections.next();
 				out.print("    ");
-				out.println("\""+friend.getPeerProfile().getProfileKeyPair().getKeyId()+"\": {");
+				out.println("\""+friend.getIssuedReaderKey().getKeyId()+"\": {");
 				boolean[] groupMembership = friend.getGroupMembership();
 				boolean f1 = true;
 				for(int i = 0; i < groups.size(); i++) {
@@ -653,7 +646,7 @@ public class SpxpProfileData {
 							f2 = false;
 							out.println();
 							String jwkString = rk.getRoundKeyJwkSilent();
-							String encryptedSymmetricKey = SpxpCryptoToolsV02.encryptWithSharedSecret(jwkString, friend.getSharedSecret());
+							String encryptedSymmetricKey = SpxpCryptoToolsV03.encryptSymmetricCompact(jwkString, friend.getIssuedReaderKey());
 							out.print("            ");
 							String kid = rk.getRoundKeySilent().getKeyId();
 							String[] kidParts = kid.split("\\.");
@@ -677,7 +670,7 @@ public class SpxpProfileData {
 			}
 			out.println("}");
 		}
-	}*/
+	}
 
 	public boolean hasAccessThroughOtherGroup(SpxpFriendConnectionData friend, int g) {
 		boolean[] groupMembership = friend.getGroupMembership();
@@ -695,35 +688,6 @@ public class SpxpProfileData {
 		}
 		return false;
 	}
-
-	// total 1797sec
-	/*
-	public void writeSpxpKeys_OLD(File targetDir) throws Exception {
-		JSONObject keysObj = Tools.newOrderPreservingJSONObject();
-		for(SpxpFriendConnectionData friend : friendConnections) {
-			JSONObject friendKeysObj = Tools.newOrderPreservingJSONObject();
-			boolean[] groupMembership = friend.getGroupMembership();
-			for(int i = 0; i < groups.size(); i++) {
-				if(groupMembership[i]) {
-					JSONObject roundKeysObj = Tools.newOrderPreservingJSONObject();
-					for(SpxpRoundKey rk : groups.get(i).getRoundKeys()) {
-						SpxpSymmetricKeySpec keySpec = rk.getRoundKeySilent();
-						String jwkString = keySpec.getJWK();
-						String encryptedSymmetricKey = SpxpCryptoTools.encryptGroupKeyCompact(jwkString, friend.getSharedSecret());
-						roundKeysObj.put(keySpec.getKeyId(), encryptedSymmetricKey);
-					}
-					friendKeysObj.put(groups.get(i).getSymmetricGroupKeyId(), roundKeysObj);
-				}
-			}
-			if(!friendKeysObj.isEmpty()) {
-				keysObj.put(friend.getPeerProfile().getProfileKeyId(), friendKeysObj);
-			}
-		}
-		try( OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(targetDir, profileName)), StandardCharsets.UTF_8) ) {
-			keysObj.write(out, 4, 0);
-		}
-	}
-	*/
 
 	public void writePosts(File targetDir) throws Exception {
 		JSONArray postsArray = new JSONArray();
