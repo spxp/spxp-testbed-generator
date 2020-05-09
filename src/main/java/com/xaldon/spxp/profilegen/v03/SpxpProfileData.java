@@ -146,6 +146,7 @@ public class SpxpProfileData {
 				SpxpCertificatePermission.COMMENT };
 		SpxpCertificatePermission[] grantPermissions = new SpxpCertificatePermission[] {
 				SpxpCertificatePermission.GRANT,
+				SpxpCertificatePermission.FRIENDS,
 				SpxpCertificatePermission.IMPERSONATE,
 				SpxpCertificatePermission.POST,
 				SpxpCertificatePermission.COMMENT };
@@ -153,38 +154,22 @@ public class SpxpProfileData {
 				SpxpCertificatePermission.IMPERSONATE,
 				SpxpCertificatePermission.POST,
 				SpxpCertificatePermission.COMMENT };
+		SpxpCertificatePermission[] fPermissions = new SpxpCertificatePermission[] {
+				SpxpCertificatePermission.FRIENDS };
 		// fake root authority
 		SpxpProfileImpersonationKey rootAuthority = new SpxpProfileImpersonationKey(profileKeyPair, null);
 		// directly signed by profile key pair
-		SpxpProfileKeyPair impersonateKeyPair1 = SpxpCryptoToolsV03.generateProfileKeyPair();
-		JSONObject impersonateCertificate1 = CryptoTools.createCertificate(impersonateKeyPair1, ipcPermissions, profileKeyPair, null);
-		SpxpProfileImpersonationKey profileImpersonateKey1 = new SpxpProfileImpersonationKey(impersonateKeyPair1, impersonateCertificate1);
-		this.allImpersonationKeys.add(profileImpersonateKey1);
-		this.extraPostSigningImpersonationKeys.add(profileImpersonateKey1);
+		this.extraPostSigningImpersonationKeys.add(createImpersonationKey(ipcPermissions, rootAuthority));
+		this.extraFriendsSigningImpersonationKeys.add(createImpersonationKey(fPermissions, rootAuthority));
 		// signed by a key that has permission to GRANT i-p-c permissions
-		SpxpProfileKeyPair grantKeyPair1 = SpxpCryptoToolsV03.generateProfileKeyPair();
-		JSONObject grantCertificate1 = CryptoTools.createCertificate(grantKeyPair1, grantPermissions, profileKeyPair, null);
-		SpxpProfileImpersonationKey grantImpersonateKey1 = new SpxpProfileImpersonationKey(grantKeyPair1, grantCertificate1);
-		this.allImpersonationKeys.add(grantImpersonateKey1);
-		SpxpProfileKeyPair impersonateKeyPair2 = SpxpCryptoToolsV03.generateProfileKeyPair();
-		JSONObject impersonateCertificate2 = CryptoTools.createCertificate(impersonateKeyPair2, ipcPermissions, grantKeyPair1, grantCertificate1);
-		SpxpProfileImpersonationKey profileImpersonateKey2 = new SpxpProfileImpersonationKey(impersonateKeyPair2, impersonateCertificate2);
-		this.allImpersonationKeys.add(profileImpersonateKey2);
-		this.extraPostSigningImpersonationKeys.add(profileImpersonateKey2);
+		SpxpProfileImpersonationKey grantKeyDirect = createImpersonationKey(grantPermissions, rootAuthority);
+		this.extraPostSigningImpersonationKeys.add(createImpersonationKey(ipcPermissions, grantKeyDirect));
+		this.extraFriendsSigningImpersonationKeys.add(createImpersonationKey(fPermissions, grantKeyDirect));
 		// signed by a key that has permission to GRANT i-p-c permissions from a CA
-		SpxpProfileKeyPair caKeyPair = SpxpCryptoToolsV03.generateProfileKeyPair();
-		JSONObject caCertificate = CryptoTools.createCertificate(grantKeyPair1, caPermissions, profileKeyPair, null);
-		SpxpProfileImpersonationKey caImpersonateKey = new SpxpProfileImpersonationKey(caKeyPair, caCertificate);
-		this.allImpersonationKeys.add(caImpersonateKey);
-		SpxpProfileKeyPair grantKeyPair2 = SpxpCryptoToolsV03.generateProfileKeyPair();
-		JSONObject grantCertificate2 = CryptoTools.createCertificate(grantKeyPair2, grantPermissions, caKeyPair, caCertificate);
-		SpxpProfileImpersonationKey grantImpersonateKey2 = new SpxpProfileImpersonationKey(grantKeyPair2, grantCertificate2);
-		this.allImpersonationKeys.add(grantImpersonateKey2);
-		SpxpProfileKeyPair impersonateKeyPair3 = SpxpCryptoToolsV03.generateProfileKeyPair();
-		JSONObject impersonateCertificate3 = CryptoTools.createCertificate(impersonateKeyPair3, ipcPermissions, grantKeyPair2, grantCertificate2);
-		SpxpProfileImpersonationKey profileImpersonateKey3 = new SpxpProfileImpersonationKey(impersonateKeyPair3, impersonateCertificate3);
-		this.allImpersonationKeys.add(profileImpersonateKey3);
-		this.extraPostSigningImpersonationKeys.add(profileImpersonateKey3);
+		SpxpProfileImpersonationKey caImpersonateKey = createImpersonationKey(caPermissions, rootAuthority);
+		SpxpProfileImpersonationKey grantKeyCA = createImpersonationKey(grantPermissions, caImpersonateKey);
+		this.extraPostSigningImpersonationKeys.add(createImpersonationKey(ipcPermissions, grantKeyCA));
+		this.extraFriendsSigningImpersonationKeys.add(createImpersonationKey(fPermissions, grantKeyCA));
 	}
 	
 	private SpxpProfileImpersonationKey createImpersonationKey(SpxpCertificatePermission[] permissions, SpxpProfileImpersonationKey parentAuthority) throws SpxpCryptoException {
@@ -570,17 +555,27 @@ public class SpxpProfileData {
 			if(!a.isEmpty()) {
 				JSONObject p = Tools.newOrderPreservingJSONObject();
 				p.put("data", a);
-				SpxpCryptoToolsV03.signObject(p, profileKeyPair);
+				signFriendsObj(p);
 				privateArray.put(SpxpCryptoToolsV03.encryptSymmetricCompact(p.toString(), keySpec));
 			}
 		}
 		if(!privateArray.isEmpty()) {
 			friendsObj.put("private", privateArray);
 		}
-		SpxpCryptoToolsV03.signObject(friendsObj, profileKeyPair);
+		signFriendsObj(friendsObj);
 		try( OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(targetDir, profileName)), StandardCharsets.UTF_8) ) {
 			friendsObj.write(out, 4, 0);
 		}
+	}
+	
+	private void signFriendsObj(JSONObject friendsObj) throws SpxpCryptoException {
+		if(rand.nextInt(2)==0) {
+			SpxpCryptoToolsV03.signObject(friendsObj, profileKeyPair);
+			return;
+		}
+		SpxpProfileImpersonationKey pik = extraFriendsSigningImpersonationKeys.get(rand.nextInt(extraFriendsSigningImpersonationKeys.size()));
+		SpxpCryptoToolsV03.signObject(friendsObj, pik.getKeyPair());
+		friendsObj.getJSONObject("signature").put("key", pik.getCertificate());
 	}
 
 	// total 906sec
