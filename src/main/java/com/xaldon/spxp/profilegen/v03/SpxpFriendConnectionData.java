@@ -14,12 +14,14 @@ public class SpxpFriendConnectionData {
 	private SpxpSymmetricKeySpec issuedReaderKey;
 	
 	private JSONObject issuedCertificate;
+	
+	private SpxpSymmetricKeySpec grantedReaderKey;
+	
+	private JSONObject grantedCertificate;
 
-	public SpxpFriendConnectionData(SpxpProfileData peerProfile, boolean[] groupMembership, SpxpSymmetricKeySpec issuedReaderKey, JSONObject issuedCertificate) {
+	public SpxpFriendConnectionData(SpxpProfileData peerProfile, boolean[] groupMembership) {
 		this.peerProfile = peerProfile;
 		this.groupMembership = groupMembership;
-		this.issuedReaderKey = issuedReaderKey;
-		this.issuedCertificate = issuedCertificate;
 	}
 
 	public SpxpProfileData getPeerProfile() {
@@ -30,12 +32,30 @@ public class SpxpFriendConnectionData {
 		return groupMembership;
 	}
 	
+	public void setIssuedReaderKeyAndCertificate(SpxpSymmetricKeySpec issuedReaderKey, JSONObject issuedCertificate) {
+		this.issuedReaderKey = issuedReaderKey;
+		this.issuedCertificate = issuedCertificate;
+	}
+	
 	public SpxpSymmetricKeySpec getIssuedReaderKey() {
 		return issuedReaderKey;
 	}
 	
 	public JSONObject getIssuedCertificate() {
 		return issuedCertificate;
+	}
+	
+	public void setGrantedReaderKeyAndCertificate(SpxpSymmetricKeySpec grantedReaderKey, JSONObject grantedCertificate) {
+		this.grantedReaderKey = grantedReaderKey;
+		this.grantedCertificate = grantedCertificate;
+	}
+	
+	public SpxpSymmetricKeySpec getGrantedReaderKey() {
+		return grantedReaderKey;
+	}
+	
+	public JSONObject getGrantedCertificate() {
+		return grantedCertificate;
 	}
 
 	public void extendGroupsTo(int size) {

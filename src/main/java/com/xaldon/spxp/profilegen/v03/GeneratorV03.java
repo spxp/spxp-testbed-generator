@@ -105,8 +105,11 @@ public class GeneratorV03 {
 		List<SpxpProfileData> profiles = generateProfiles(PROFILE_ROOT_URL, GENERATED_PROFILES_COUNT/2, GENERATED_PROFILES_COUNT/2);
 		System.out.println("Generating posts...");
 		generatePosts(profiles, POSTS_PER_PROFILE_COUNT, now);
-		System.out.println("Assigning friends, generating reader keys and issuing certificates...");
+		System.out.println("Assigning friends...");
 		assignFriends(profiles);
+		System.out.println("Generating reader keys and issuing certificates...");
+		generateReaderKeysAndCertificates(profiles);
+		System.out.println("Creating virtual groups...");
 		if(maxUsersPerGroup > 0) {
 			createVirtualGroups(profiles, maxUsersPerGroup);
 		}
@@ -360,6 +363,12 @@ public class GeneratorV03 {
 		second.addFriend(first);
 	}
 
+	private void generateReaderKeysAndCertificates(List<SpxpProfileData> profiles) throws Exception {
+		for(SpxpProfileData profile : profiles) {
+			profile.issueReaderKeyAndCertificateToAllConnected();
+		}
+	}
+	
 	private void createVirtualGroups(List<SpxpProfileData> profiles, int maxUsersPerGroup) {
 		for(SpxpProfileData profile : profiles) {
 			createVirtualGroupsPerProfile(profile, maxUsersPerGroup);
@@ -369,8 +378,7 @@ public class GeneratorV03 {
 	private void createVirtualGroupsPerProfile(SpxpProfileData profile, int maxUsersPerGroup) {
 		for(int i = 0; i < profile.getGroups().size(); i++) {
 			List<SpxpFriendConnectionData> friendsOnlyInThisGroup = new LinkedList<>();
-			for(int ii = 0; ii < profile.getActualFriendCount(); ii++) {
-				SpxpFriendConnectionData friend = profile.getFriendConnectionData(ii);
+			for(SpxpFriendConnectionData friend : profile.getFriendConnections()) {
 				boolean[] memberships = friend.getGroupMembership();
 				if(memberships[i] && !profile.hasAccessThroughOtherGroup(friend, i)) {
 					friendsOnlyInThisGroup.add(friend);
@@ -424,7 +432,8 @@ public class GeneratorV03 {
 			}
 			for(int i = 0; i < unfriendEventsPerPeriod; i++) {
 				long ts = oldTs - ((1+rand.nextInt(PeriodLengthInDays-2)) * MS_PER_DAY);
-				boolean[] needToRoll = getSetOfGroupKeysFriendCanDecrypt(profile, profile.getFriendConnectionData(rand.nextInt(profile.getActualFriendCount())));
+				SpxpFriendConnectionData randomFriendConnection = profile.getRandomFriendConnection();
+				boolean[] needToRoll = getSetOfGroupKeysFriendCanDecrypt(profile, randomFriendConnection);
 				for(int ii = 0; ii < groupsCnt; ii++) {
 					if(needToRoll[ii]) {
 						separationDates.get(ii).add(new Date(ts));

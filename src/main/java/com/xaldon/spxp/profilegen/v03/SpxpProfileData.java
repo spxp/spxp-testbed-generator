@@ -8,10 +8,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -67,11 +69,11 @@ public class SpxpProfileData {
 	
 	private int actualFriendCount;
 	
-	private LinkedList<SpxpFriendConnectionData> friendConnections = new LinkedList<>();
+	private LinkedHashMap<String, SpxpFriendConnectionData> friendConnections = new LinkedHashMap<>();
+	
+	private ArrayList<String> friendConnectionKeys;
 	
 	private HashMap<Integer, LinkedList<Integer>> groupInGroupMemberships = new HashMap<>();
-	
-	private HashSet<SpxpProfileData> connectedProfilesSet = new HashSet<>();
 	
 	private LinkedList<SpxpPost> posts = new LinkedList<>();
 	
@@ -80,13 +82,6 @@ public class SpxpProfileData {
 	private ArrayList<SpxpProfileImpersonationKey> extraPostSigningImpersonationKeys = new ArrayList<>();
 	
 	private ArrayList<SpxpProfileImpersonationKey> extraFriendsSigningImpersonationKeys = new ArrayList<>();
-
-	private class PeerConnectionData {
-		SpxpSymmetricKeySpec readerKey;
-		JSONObject certificate;
-	}
-	
-	private HashMap<String, PeerConnectionData> peerConnectionData = new HashMap<>();
 
 	public SpxpProfileData(
 			Random rand,
@@ -254,7 +249,7 @@ public class SpxpProfileData {
 		for(int i = 0; i < additionalGroupCount; i++) {
 			groups.add(new SpxpProfileGroupData(base.getDisplayName()+" (virt "+i+")", base.getGroupId()+"-virt_"+i, true));
 		}
-		for(SpxpFriendConnectionData fcd : friendConnections) {
+		for(SpxpFriendConnectionData fcd : friendConnections.values()) {
 			fcd.extendGroupsTo(groups.size());
 		}
 	}
@@ -272,7 +267,7 @@ public class SpxpProfileData {
 	}
 	
 	public boolean isFriend(SpxpProfileData peer) {
-		return connectedProfilesSet.contains(peer);
+		return friendConnections.containsKey(peer.getProfileName());
 	}
 
 	public void addFriend(SpxpProfileData peer) throws SpxpCryptoException {
@@ -287,34 +282,44 @@ public class SpxpProfileData {
 				groupMembership[i] = true;
 			}
 		}
-		// create reader key for peer profile
-		byte[] readerKey = SpxpCryptoToolsV03.generateSymmetricKey(256);
-		String readerKid = profileName+"-readerkey-for-"+peer.getProfileName();
-		SpxpSymmetricKeySpec issuedReaderKeySpec = new SpxpSymmetricKeySpec(readerKid, readerKey);
-		// grant publishing permissions to own posts with 75% probability
-		JSONObject issuedCertificate = null;
-		if(rand.nextInt(4) > 0) {
-			SpxpCertificatePermission[] pcPermissions = new SpxpCertificatePermission[] {
-					SpxpCertificatePermission.POST,
-					SpxpCertificatePermission.COMMENT };
-			issuedCertificate = CryptoTools.createCertificate(peer.getProfileKeyPair(), pcPermissions, profileKeyPair, null);
-		}
-		// add new friend connection to list of friends
-		peer.provideConnectionData(this.profileUri, issuedReaderKeySpec, issuedCertificate);
-		friendConnections.add(new SpxpFriendConnectionData(peer, groupMembership, issuedReaderKeySpec, issuedCertificate));
-		connectedProfilesSet.add(peer);
+		friendConnections.put(peer.getProfileName(), new SpxpFriendConnectionData(peer, groupMembership));
 		actualFriendCount++;
 	}
 	
-	public void provideConnectionData(String peerProfileUri, SpxpSymmetricKeySpec readerKey, JSONObject certificate) {
-		PeerConnectionData pcd = new PeerConnectionData();
-		pcd.readerKey = readerKey;
-		pcd.certificate = certificate;
-		this.peerConnectionData.put(peerProfileUri, pcd);
+	public void issueReaderKeyAndCertificateToAllConnected() throws SpxpCryptoException {
+		for(SpxpFriendConnectionData fcd : friendConnections.values()) {
+			SpxpProfileData peer = fcd.getPeerProfile();
+			// create reader key for peer profile
+			byte[] readerKey = SpxpCryptoToolsV03.generateSymmetricKey(256);
+			String readerKid = profileName+"-readerkey-for-"+peer.getProfileName();
+			SpxpSymmetricKeySpec issuedReaderKey = new SpxpSymmetricKeySpec(readerKid, readerKey);
+			// grant publishing permissions to own posts with 75% probability
+			JSONObject issuedCertificate = null;
+			if(rand.nextInt(4) > 0) {
+				SpxpCertificatePermission[] pcPermissions = new SpxpCertificatePermission[] {
+						SpxpCertificatePermission.POST,
+						SpxpCertificatePermission.COMMENT };
+				issuedCertificate = CryptoTools.createCertificate(peer.getProfileKeyPair(), pcPermissions, profileKeyPair, null);
+			}
+			fcd.setIssuedReaderKeyAndCertificate(issuedReaderKey, issuedCertificate);
+			peer.provideConnectionData(this, issuedReaderKey, issuedCertificate);
+		}
+	}
+	
+	public void provideConnectionData(SpxpProfileData peer, SpxpSymmetricKeySpec grantedReaderKey, JSONObject grantedCertificate) {
+		friendConnections.get(peer.getProfileName()).setGrantedReaderKeyAndCertificate(grantedReaderKey, grantedCertificate);
 	}
 
-	public SpxpFriendConnectionData getFriendConnectionData(int i) {
-		return friendConnections.get(i);
+	public Collection<SpxpFriendConnectionData> getFriendConnections() {
+		return Collections.unmodifiableCollection(friendConnections.values());
+	}
+	
+	public SpxpFriendConnectionData getRandomFriendConnection() {
+		if(friendConnectionKeys == null) {
+			friendConnectionKeys = new ArrayList<>(friendConnections.keySet());
+		}
+		String randomFriendProfileName = friendConnectionKeys.get(rand.nextInt(friendConnectionKeys.size()));
+		return friendConnections.get(randomFriendProfileName);
 	}
 	
 	public List<Integer> getGroupsMembersOfGroup(int grp) {
@@ -359,22 +364,19 @@ public class SpxpProfileData {
 		profileObj.put("impersonationKeys", impersonationKeysArray);
 		// connections
 		JSONArray connectionsArray = new JSONArray();
-		Iterator<SpxpFriendConnectionData> itFriendConnections = friendConnections.iterator();
-		while(itFriendConnections.hasNext()) {
-			SpxpFriendConnectionData friend = itFriendConnections.next();
+		for(SpxpFriendConnectionData fcd : friendConnections.values()) {
 			JSONObject connectionObj = Tools.newOrderPreservingJSONObject();
-			connectionObj.put("profileUri", friend.getPeerProfile().getProfileUri());
-			connectionObj.put("issuedReaderKey", CryptoTools.getOrderedSymmetricJWK(friend.getIssuedReaderKey()));
-			if(friend.getIssuedCertificate() != null) {
-				connectionObj.put("issuedCertificate", friend.getIssuedCertificate());
+			connectionObj.put("profileUri", fcd.getPeerProfile().getProfileUri());
+			connectionObj.put("issuedReaderKey", CryptoTools.getOrderedSymmetricJWK(fcd.getIssuedReaderKey()));
+			if(fcd.getIssuedCertificate() != null) {
+				connectionObj.put("issuedCertificate", fcd.getIssuedCertificate());
 			}
-			PeerConnectionData pcd = peerConnectionData.get(friend.getPeerProfile().getProfileUri());
-			connectionObj.put("grantedReaderKey", CryptoTools.getOrderedSymmetricJWK(pcd.readerKey));
-			if(pcd.certificate != null) {
-				connectionObj.put("grantedCertificate", pcd.certificate);
+			connectionObj.put("grantedReaderKey", CryptoTools.getOrderedSymmetricJWK(fcd.getGrantedReaderKey()));
+			if(fcd.getGrantedCertificate() != null) {
+				connectionObj.put("grantedCertificate", fcd.getGrantedCertificate());
 			}
 			JSONArray connectionGroupsArray = new JSONArray();
-			boolean[] groupMembership = friend.getGroupMembership();
+			boolean[] groupMembership = fcd.getGroupMembership();
 			for(int i = 0; i < groups.size(); i++) {
 				if(groupMembership[i]) {
 					connectionGroupsArray.put(groups.get(i).getGroupId());
@@ -515,7 +517,7 @@ public class SpxpProfileData {
 			privateData.add(new JSONArray());
 		}
 		JSONArray friendsData = new JSONArray();
-		for(SpxpFriendConnectionData frindConnection : friendConnections) {
+		for(SpxpFriendConnectionData frindConnection : friendConnections.values()) {
 			String friendUri = frindConnection.getPeerProfile().getProfileUri();
 			if(rand.nextInt(4) != 0) {
 				// 75% of friends connections are public
@@ -620,7 +622,7 @@ public class SpxpProfileData {
 				out.println("},");
 			}
 			// connections
-			Iterator<SpxpFriendConnectionData> itFriendConnections = friendConnections.iterator();
+			Iterator<SpxpFriendConnectionData> itFriendConnections = friendConnections.values().iterator();
 			while(itFriendConnections.hasNext()) {
 				SpxpFriendConnectionData friend = itFriendConnections.next();
 				out.print("    ");
