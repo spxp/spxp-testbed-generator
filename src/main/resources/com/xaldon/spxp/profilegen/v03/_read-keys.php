@@ -6,14 +6,14 @@ if(isset($_GET['profile'])) {
   $json = json_decode(file_get_contents($_GET['profile']), true);
 }
 
-$connectionId = $_GET['connectionId'];
+$readerKid = $_GET['reader'];
 
 $datapool = array();
 
 $requestQueue = array();
 $processed = array();
 
-array_push($requestQueue, $connectionId);
+array_push($requestQueue, $readerKid);
 
 while($next = array_shift($requestQueue)) {
   array_push($processed, $next);
@@ -42,10 +42,9 @@ if(isset($_GET['request'])) {
   foreach($datapool as $k1 => $v1) {
     foreach($v1 as $k2 => $v2) {
       reset($v2);
-      $first_key = key($v2);
-      $response[$k1][$k2][$first_key] = $v2[$first_key];
-      $requiredDecryptionKey = get_required_decrypt_kid($v2[$first_key]);
-      //$response[$k1][$k2]['___'] = $requiredDecryptionKey;
+      $first_round = key($v2);
+      $response[$k1][$k2][$first_round] = $v2[$first_round];
+      $requiredDecryptionKey = get_required_decrypt_kid($v2[$first_round]);
       array_push($requiredKeys, $requiredDecryptionKey);
     }
   }
@@ -65,23 +64,26 @@ while($requiredKey = array_shift($requiredKeys)) {
 echo json_encode($response);
 
 function has_key(&$data, $kid) {
+  $kidParts = explode(".", $kid);
+  $groupId = $kidParts[0];
+  $roundId = $kidParts[1];
   foreach($data as $k1 => $v1) {
-    foreach($v1 as $k2 => $v2) {
-      if(isset($v2[$kid])) {
-        return true;
-      }
+    if(isset($v1[$groupId][$roundId])) {
+      return true;
     }
   }
   return false;
 }
 
 function add_key(&$source, &$target, $kid) {
+  $kidParts = explode(".", $kid);
+  $groupId = $kidParts[0];
+  $roundId = $kidParts[1];
   foreach($source as $k1 => $v1) {
-    foreach($v1 as $k2 => $v2) {
-      if(isset($v2[$kid])) {
-        $target[$k1][$k2][$kid] = $v2[$kid];
-        return get_required_decrypt_kid($v2[$kid]);
-      }
+    if(isset($v1[$groupId][$roundId])) {
+      $nextKey = $v1[$groupId][$roundId];
+      $target[$k1][$groupId][$roundId] = $nextKey;
+      return get_required_decrypt_kid($nextKey);
     }
   }
   return NULL;
