@@ -28,7 +28,7 @@ $response = array(
 
 $cnt = 0;
 foreach($data as $elem) {
-  $ts = DateTime::createFromFormat('Y-m-d\TH:i:s.u', $elem['timestampUTC'], $tzutc);
+  $ts = DateTime::createFromFormat('Y-m-d\TH:i:s.u', $elem['seqts'], $tzutc);
   if($before && ($ts->getTimestamp() >= $before->getTimestamp()))
     continue;
   if($after && ($ts->getTimestamp() <= $after->getTimestamp()))
