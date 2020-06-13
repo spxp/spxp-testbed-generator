@@ -1,7 +1,7 @@
 {
     "ver" : "0.3",
     "name" : "Madrid",
-    "shortInfo" : "Capital of Spain"
+    "shortInfo" : "Capital of Spain",
     "about" : "Madrid is the capital and most populous city of Spain. The city has almost 3.3 million inhabitants. Madrid lies on the River Manzanares in the centre of both the country and the Community of Madrid region, of which it is also the capital. As the capital city of Spain, seat of government, residence of the Spanish monarch, Madrid is also the political, economic and cultural centre of the country.",
     "website" : "http://madrid.es/",
     "coordinates" : {
