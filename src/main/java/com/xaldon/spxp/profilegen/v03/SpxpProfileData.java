@@ -112,7 +112,7 @@ public class SpxpProfileData {
 		this.profileUri = baseUri + profileName;
 		this.fullName = fullName;
 		this.shortInfo = shortInfo;
-        this.publicShortInfo = shortInfo;
+        this.publicShortInfo = publicShortInfo;
         this.about = about;
 		this.gender = gender;
 		this.email = email;
