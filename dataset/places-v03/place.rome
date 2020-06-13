@@ -1,7 +1,8 @@
 {
     "ver" : "0.3",
     "name" : "Rome",
-    "about" : "The capital city and a special comune of Italy.",
+    "shortInfo" : "The Eternal City",
+    "about" : "Rome is the capital city of Italy as well as the capital of the Lazio region. The city has been a major human settlement for over two millennia. With 2,860,009 residents in 1,285 km2, it is also the country's most populated comune. Rome is located in the central-western portion of the Italian Peninsula, within Lazio (Latium), along the shores of the Tiber. Vatican City (the smallest country in the world) is an independent country inside the city boundaries of Rome, the only existing example of a country within a city; for this reason Rome has sometimes been defined as the capital of two states.",
     "website" : "https://www.comune.roma.it/web/it/home.page",
     "coordinates" : {
         "latitude" : "41.883333",

@@ -1,7 +1,8 @@
 {
     "ver" : "0.3",
-    "name" : "Bejin",
+    "name" : "Bejin 北京市",
     "about" : "The capital of the People's Republic of China.",
+    "about" : "Beijing is the capital of the People's Republic of China. It is the world's most populous capital city, with over 21 million residents within an administrative area of 16,410.5 km2. The city, located in North China, is governed as a municipality under the direct administration of the central government with 16 urban, suburban, and rural districts. Beijing is mostly surrounded by Hebei Province with the exception of neighboring Tianjin to the southeast; together, the three divisions form the Jingjinji megalopolis and the national capital region of China. Beijing is an important world capital and global power city, and one of the world's leading centers for culture, diplomacy and politics, business and economy, education, language, and science and technology. A megacity, Beijing is the second largest Chinese city by urban population after Shanghai and is the nation's cultural, educational, and political center. It is home to the headquarters of most of China's largest state-owned companies and houses the largest number of Fortune Global 500 companies in the world, as well as the world's four biggest financial institutions. It is also a major hub for the national highway, expressway, railway, and high-speed rail networks. The Beijing Capital International Airport has been the second busiest in the world by passenger traffic since 2010, and, as of 2016, the city's subway network is the busiest and longest in the world.",
     "website" : "http://www.ebeijing.gov.cn/",
     "coordinates" : {
         "latitude" : "39.916667",

@@ -1,7 +1,8 @@
 {
     "ver" : "0.3",
-    "name" : "Moscow",
-    "about" : "The capital and most populous city of Russia.",
+    "name" : "Moscow Москва",
+    "shortInfo" : "Kremlin, Red Square, St. Basil's Cathedral",
+    "about" : "Moscow is the capital and most populous city of Russia, standing on the Moskva River in the central part of Western Russia, Moscow's population is estimated at 12.5 million residents within the city proper, while over 17 million residents in the urban area, and over 20 million residents in the Moscow Metropolitan Area. The city limits cover an area of 2,511 square kilometres, while the metropolitan area covers over 26,000 square kilometres, Moscow is among the world's largest cities, being the most populous city entirely within Europe, the most populous urban area in Europe, the most populous metropolitan area in Europe, and also the largest city (by area) on the European continent.",
     "website" : "https://www.mos.ru/en",
     "coordinates" : {
         "latitude" : "55.755833",

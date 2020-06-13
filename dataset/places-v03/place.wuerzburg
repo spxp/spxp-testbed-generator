@@ -1,7 +1,8 @@
 {
     "ver" : "0.3",
     "name" : "Würzburg",
-    "about" : "City in the region of Franconia, northern Bavaria, Germany.",
+    "shortInfo" : " Main-Franconian: Wörtzburch, Bavarian: Wiazbuag"
+    "about" : "City in the region of Franconia, northern Bavaria, Germany. Located on the Main River, it is the capital of the Regierungsbezirk of Lower Franconia. The regional dialect is East Franconian. Würzburg lies about equidistant from Frankfurt am Main and Nuremberg (each about 120 kilometers or 75 miles away). Although the city of Würzburg is not part of the Landkreis Würzburg, (i.e., district of Würzburg), it is the seat of the district's administration. The city has a population of around 130,000 people.",
     "website" : "https://www.wuerzburg.de/en/index.html",
     "coordinates" : {
         "latitude" : "49.783333",

@@ -1,7 +1,8 @@
 {
     "ver" : "0.3",
     "name" : "Paris",
-    "about" : "The capital and most populous city of France.",
+    "shortInfo" : "Home of the Eiffel tower and Louvre",
+    "about" : "Paris is the capital and most populous city of France, with a population of 2,148,271 residents in an area of 105 square kilometres. Since the 17th century, Paris has been one of Europe's major centres of finance, diplomacy, commerce, fashion, science and arts. The City of Paris is the centre and seat of government of the Île-de-France, or Paris Region, which has an estimated official 2020 population of 12,278,210, or about 18 percent of the population of France.",
     "website" : "https://www.paris.fr/",
     "coordinates" : {
         "latitude" : "48.856613",
