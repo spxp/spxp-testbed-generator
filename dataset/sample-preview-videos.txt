@@ -1,0 +1,5 @@
+http://testbed.spxp.org/videos/sample1.jpg
+http://testbed.spxp.org/videos/sample2.jpg
+http://testbed.spxp.org/videos/sample3.jpg
+http://testbed.spxp.org/videos/sample4.jpg
+http://testbed.spxp.org/videos/sample5.jpg

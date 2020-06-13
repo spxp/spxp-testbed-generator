@@ -51,11 +51,21 @@ public class GeneratorV03 {
 	
 	private ArrayList<String> sampleTextPostMessages = new ArrayList<String>(1000);
 	
+	private ArrayList<String> sampleWebPostMessages = new ArrayList<String>(5);
+	
+	private ArrayList<String> sampleWebLinks = new ArrayList<String>(5);
+	
 	private ArrayList<String> samplePhotoPostMessages = new ArrayList<String>(5);
 	
 	private ArrayList<String> sampleSmallPhotoUrls = new ArrayList<String>(2400);
 	
 	private ArrayList<String> sampleRegularPhotoUrls = new ArrayList<String>(2400);
+	
+	private ArrayList<String> sampleVideoPostMessages = new ArrayList<String>(5);
+	
+	private ArrayList<String> samplePreviewVideoUrls = new ArrayList<String>(5);
+	
+	private ArrayList<String> sampleMediaVideoUrls = new ArrayList<String>(5);
 
 	private Random rand = new Random(9876543210l);
 	
@@ -287,20 +297,24 @@ public class GeneratorV03 {
 			}
 			seqTs -= distanceInMs;
 			Date seqDate = new Date(seqTs);
-            switch(rand.nextInt(2)) {
-            case 0: // text
-            	profile.addPost(generateTextPost(seqDate));
-            	break;
-            case 1: // photo
-            	profile.addPost(generatePhotoPost(seqDate));
-            	break;
-/*                case 2: // video
-            	break;
-            case 3: // link
-            	break;
-            case 4: // profile
-            	break;*/
-            }
+        	profile.addPost(generatePost(seqDate));
+		}
+	}
+	
+	private SpxpPost generatePost(Date seqDate) {
+		int r = rand.nextInt(100);
+		if( r < 45) {
+			// 45%
+        	return generateTextPost(seqDate);
+		} else if(r < 50) {
+			// 5%
+        	return generateWebPost(seqDate);
+		} else if(r < 95) {
+			// 45%
+        	return generatePhotoPost(seqDate);
+		} else {
+			// 5%
+        	return generateVideoPost(seqDate);
 		}
 	}
 	
@@ -309,6 +323,13 @@ public class GeneratorV03 {
 		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())) : null;
 		Date createDate = new Date(seqDate.getTime() - rand.nextInt(4 * 60 * 60 * 1000)); // post created up to 4 hrs before being received by server
 		return new SpxpTextPost(seqDate, createDate, message, place);
+	}
+	
+	private SpxpPost generateWebPost(Date seqDate) {
+		String message = sampleWebPostMessages.get(rand.nextInt(sampleWebPostMessages.size()));
+		String link = sampleWebLinks.get(rand.nextInt(sampleWebLinks.size()));
+		Date createDate = new Date(seqDate.getTime() - rand.nextInt(4 * 60 * 60 * 1000)); // post created up to 4 hrs before being received by server
+		return new SpxpWebPost(seqDate, createDate, message, link);
 	}
 
 	private SpxpPost generatePhotoPost(Date seqDate) {
@@ -319,6 +340,16 @@ public class GeneratorV03 {
         String smallUrl = sampleSmallPhotoUrls.get(i);
 		Date createDate = new Date(seqDate.getTime() - rand.nextInt(4 * 60 * 60 * 1000)); // post created up to 4 hrs before being received by server
 		return new SpxpPhotoPost(seqDate, createDate, message, fullUrl, smallUrl, place);
+	}
+
+	private SpxpPost generateVideoPost(Date seqDate) {
+		String message = sampleVideoPostMessages.get(rand.nextInt(sampleVideoPostMessages.size()));
+		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())) : null;
+        int i = rand.nextInt(samplePreviewVideoUrls.size());
+        String mediaUrl = sampleMediaVideoUrls.get(i);
+        String previewUrl = samplePreviewVideoUrls.get(i);
+		Date createDate = new Date(seqDate.getTime() - rand.nextInt(4 * 60 * 60 * 1000)); // post created up to 4 hrs before being received by server
+		return new SpxpVideoPost(seqDate, createDate, message, mediaUrl, previewUrl, place);
 	}
 
 	private void assignFriends(List<SpxpProfileData> profiles) throws Exception {
@@ -480,9 +511,14 @@ public class GeneratorV03 {
 	private void loadSampleData() throws IOException {
 		Tools.loadDataFromFile("dataset/sample-quotes.txt", sampleQuotes);
 		Tools.loadDataFromFile("dataset/sample-places-v03.txt", samplePlaces);
+		Tools.loadDataFromFile("dataset/sample-web-post-messages.txt", sampleWebPostMessages);
+		Tools.loadDataFromFile("dataset/sample-web-links.txt", sampleWebLinks);
 		Tools.loadDataFromFile("dataset/sample-photo-post-messages.txt", samplePhotoPostMessages);
 		Tools.loadDataFromFile("dataset/sample-small-photos.txt", sampleSmallPhotoUrls);
 		Tools.loadDataFromFile("dataset/sample-regular-photos.txt", sampleRegularPhotoUrls);
+		Tools.loadDataFromFile("dataset/sample-video-post-messages.txt", sampleVideoPostMessages);
+		Tools.loadDataFromFile("dataset/sample-preview-videos.txt", samplePreviewVideoUrls);
+		Tools.loadDataFromFile("dataset/sample-media-videos.txt", sampleMediaVideoUrls);
 		try(Scanner s = new Scanner(new File("dataset/sample-text-post-messages.txt")/*, "UTF-8"*/)) {
 			s.useDelimiter("\\r\\n|\\n");
 			while(s.hasNext()) {
