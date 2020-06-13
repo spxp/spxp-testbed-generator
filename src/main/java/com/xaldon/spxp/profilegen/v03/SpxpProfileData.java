@@ -143,18 +143,15 @@ public class SpxpProfileData {
 				SpxpCertificatePermission.GRANT,
 				SpxpCertificatePermission.FRIENDS,
 				SpxpCertificatePermission.IMPERSONATE,
-				SpxpCertificatePermission.POST,
-				SpxpCertificatePermission.COMMENT };
+				SpxpCertificatePermission.POST };
 		SpxpCertificatePermission[] grantPermissions = new SpxpCertificatePermission[] {
 				SpxpCertificatePermission.GRANT,
 				SpxpCertificatePermission.FRIENDS,
 				SpxpCertificatePermission.IMPERSONATE,
-				SpxpCertificatePermission.POST,
-				SpxpCertificatePermission.COMMENT };
+				SpxpCertificatePermission.POST };
 		SpxpCertificatePermission[] ipcPermissions = new SpxpCertificatePermission[] {
 				SpxpCertificatePermission.IMPERSONATE,
-				SpxpCertificatePermission.POST,
-				SpxpCertificatePermission.COMMENT };
+				SpxpCertificatePermission.POST };
 		SpxpCertificatePermission[] fPermissions = new SpxpCertificatePermission[] {
 				SpxpCertificatePermission.FRIENDS };
 		// fake root authority
@@ -313,8 +310,7 @@ public class SpxpProfileData {
 			JSONObject issuedCertificate = null;
 			if(rand.nextInt(4) > 0) {
 				SpxpCertificatePermission[] pcPermissions = new SpxpCertificatePermission[] {
-						SpxpCertificatePermission.POST,
-						SpxpCertificatePermission.COMMENT };
+						SpxpCertificatePermission.POST };
 				issuedCertificate = CryptoTools.createCertificate(peer.getProfileKeyPair(), pcPermissions, profileKeyPair, null);
 			}
 			fcd.setIssuedReaderKeyAndCertificate(issuedReaderKey, issuedCertificate);
