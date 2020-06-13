@@ -1,10 +1,10 @@
-http://testbed.spxp.org/0.3/place.berlin
-http://testbed.spxp.org/0.3/place.london
-http://testbed.spxp.org/0.3/place.paris
-http://testbed.spxp.org/0.3/place.tokyo
-http://testbed.spxp.org/0.3/place.bejin
-http://testbed.spxp.org/0.3/place.new.york
-http://testbed.spxp.org/0.3/place.moscow
-http://testbed.spxp.org/0.3/place.rome
-http://testbed.spxp.org/0.3/place.wuerzburg
-http://testbed.spxp.org/0.3/place.madrid
+http://testbed.spxp.org/0.3/place.berlin 52.528585 13.333213 52.503873 13.445907
+http://testbed.spxp.org/0.3/place.london 51.522656 -0.160358 51.496196 -0.065933
+http://testbed.spxp.org/0.3/place.paris 48.878034 2.305173 48.844189 2.374995
+http://testbed.spxp.org/0.3/place.tokyo 35.713949 139.728537 35.658765 139.809353
+http://testbed.spxp.org/0.3/place.bejin 39.989403 116.318015 39.865752 116.489565
+http://testbed.spxp.org/0.3/place.new.york 40.810178 -74.000074 40.708636 -73.939014
+http://testbed.spxp.org/0.3/place.moscow 55.771677 37.587076 55.735844 37.658371
+http://testbed.spxp.org/0.3/place.rome 41.943031 12.447832 41.858098 12.551195
+http://testbed.spxp.org/0.3/place.wuerzburg 49.799442 9.926984 49.778636 9.966379
+http://testbed.spxp.org/0.3/place.madrid 40.434010 -3.721204 40.399068 -3.674011

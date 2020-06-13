@@ -53,9 +53,9 @@ public class SpxpProfileData {
 	
 	private String location;
 	
-	private String latitude;
+	private double latitude;
 	
-	private String longitude;
+	private double longitude;
 	
 	private String profilePhoto;
 	
@@ -95,8 +95,8 @@ public class SpxpProfileData {
 			String birthYear,
 			String hometown,
 			String location,
-			String latitude,
-			String longitude,
+			double latitude,
+			double longitude,
 			String profilePhoto,
 			SpxpProfileKeyPair profileKeyPair,
 			ArrayList<SpxpProfileGroupData> groups,
@@ -224,11 +224,11 @@ public class SpxpProfileData {
 		return location;
 	}
 
-	public String getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public String getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
@@ -272,7 +272,7 @@ public class SpxpProfileData {
 
 	public void addFriend(SpxpProfileData peer) throws SpxpCryptoException {
 		// assign peer profile to random selection of publishing groups
-		if(nonVirtualGroupsCount  != groups.size()) {
+		if(nonVirtualGroupsCount != groups.size()) {
 			throw new RuntimeException("Friend assignment must be finished before virtual group generation");
 		}
 		boolean[] groupMembership = new boolean[groups.size()];

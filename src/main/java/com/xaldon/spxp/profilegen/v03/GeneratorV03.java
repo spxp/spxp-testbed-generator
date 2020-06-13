@@ -47,7 +47,7 @@ public class GeneratorV03 {
 	
 	private ArrayList<String> sampleQuotes = new ArrayList<String>(1000);
 	
-	private ArrayList<String> samplePlaces = new ArrayList<String>(5);
+	private ArrayList<PlaceInfo> samplePlaces = new ArrayList<PlaceInfo>(5);
 	
 	private ArrayList<String> sampleTextPostMessages = new ArrayList<String>(1000);
 	
@@ -234,11 +234,11 @@ public class GeneratorV03 {
 		String dobDate = obj.getJSONObject("dob").getString("date");
 		String birthYear = dobDate.substring(0, 4);
 		String birthDayAndMonth = dobDate.substring(8, 10) + "-" + dobDate.substring(5, 7);
-		String hometown = samplePlaces.get(rand.nextInt(samplePlaces.size()));
-		String location = samplePlaces.get(rand.nextInt(samplePlaces.size()));
-		JSONObject coordinates = obj.getJSONObject("location").getJSONObject("coordinates");
-		String latitude = coordinates.getString("latitude");
-		String longitude = coordinates.getString("longitude");
+		String hometown = samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri();
+		PlaceInfo locationPlace = samplePlaces.get(rand.nextInt(samplePlaces.size()));
+		String location = locationPlace.getProfileUri();
+		double latitude = locationPlace.getRandomLatitude(rand.nextDouble());
+		double longitude = locationPlace.getRandomLongitude(rand.nextDouble());
 		int profileImageCount = gender.equals("male") ? PROFILE_IMAGE_COUNT_MALE : PROFILE_IMAGE_COUNT_FEMALE;
 		int imageid = id % profileImageCount;
 		String profilePhoto = gender.substring(0,1)+imageid+".jpg";
@@ -320,7 +320,7 @@ public class GeneratorV03 {
 	
 	private SpxpPost generateTextPost(Date seqDate) {
 		String message = sampleTextPostMessages.get(rand.nextInt(sampleTextPostMessages.size()));
-		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())) : null;
+		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri() : null;
 		Date createDate = new Date(seqDate.getTime() - rand.nextInt(4 * 60 * 60 * 1000)); // post created up to 4 hrs before being received by server
 		return new SpxpTextPost(seqDate, createDate, message, place);
 	}
@@ -334,7 +334,7 @@ public class GeneratorV03 {
 
 	private SpxpPost generatePhotoPost(Date seqDate) {
 		String message = samplePhotoPostMessages.get(rand.nextInt(samplePhotoPostMessages.size()));
-		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())) : null;
+		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri() : null;
         int i = rand.nextInt(sampleSmallPhotoUrls.size());
         String fullUrl = sampleRegularPhotoUrls.get(i);
         String smallUrl = sampleSmallPhotoUrls.get(i);
@@ -344,7 +344,7 @@ public class GeneratorV03 {
 
 	private SpxpPost generateVideoPost(Date seqDate) {
 		String message = sampleVideoPostMessages.get(rand.nextInt(sampleVideoPostMessages.size()));
-		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())) : null;
+		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri() : null;
         int i = rand.nextInt(samplePreviewVideoUrls.size());
         String mediaUrl = sampleMediaVideoUrls.get(i);
         String previewUrl = samplePreviewVideoUrls.get(i);
@@ -510,7 +510,6 @@ public class GeneratorV03 {
 
 	private void loadSampleData() throws IOException {
 		Tools.loadDataFromFile("dataset/sample-quotes.txt", sampleQuotes);
-		Tools.loadDataFromFile("dataset/sample-places-v03.txt", samplePlaces);
 		Tools.loadDataFromFile("dataset/sample-web-post-messages.txt", sampleWebPostMessages);
 		Tools.loadDataFromFile("dataset/sample-web-links.txt", sampleWebLinks);
 		Tools.loadDataFromFile("dataset/sample-photo-post-messages.txt", samplePhotoPostMessages);
@@ -531,6 +530,16 @@ public class GeneratorV03 {
 				throw s.ioException();
 			}
 		}
+        try(Scanner s = new Scanner(new File("dataset/sample-places-v03.txt"), "UTF-8")) {
+            s.useDelimiter("\\r\\n|\\n");
+            while(s.hasNext()) {
+                String[] parts = s.next().split(" ");
+                samplePlaces.add(new PlaceInfo(parts[0], Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4])));
+            }
+            if(s.ioException() != null) {
+                throw s.ioException();
+            }
+        }
 	}
 	
 	public JSONArray getRandomUsers(String gender, int count) throws Exception {
