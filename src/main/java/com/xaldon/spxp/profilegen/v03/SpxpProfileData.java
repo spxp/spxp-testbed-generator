@@ -753,6 +753,19 @@ public class SpxpProfileData {
 	}
 	
 	private void  signPostObj(JSONObject postObj) throws SpxpCryptoException {
+		if(rand.nextInt(10)==0) {
+			// 10% of posts originate from another profile
+			while(true) {
+				SpxpFriendConnectionData fcd = getRandomFriendConnection();
+				if(fcd.getIssuedCertificate() == null) {
+					continue;
+				}
+				postObj.put("author", fcd.getPeerProfile().getProfileUri());
+				SpxpCryptoToolsV03.signObject(postObj, fcd.getPeerProfile().getProfileKeyPair());
+				postObj.getJSONObject("signature").put("key", fcd.getIssuedCertificate());
+				return;
+			}
+		}
 		if(rand.nextInt(2)==0) {
 			SpxpCryptoToolsV03.signObject(postObj, profileKeyPair);
 			return;
