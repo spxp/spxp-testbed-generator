@@ -45,7 +45,11 @@ public class GeneratorV03 {
 
 	private final static int PROFILE_IMAGE_COUNT_MALE = 200;
 	
-	private ArrayList<String> sampleQuotes = new ArrayList<String>(1000);
+	private ArrayList<String> sampleShortInfo = new ArrayList<String>(1000);
+    
+    private ArrayList<String> samplePublicShortInfo = new ArrayList<String>(5);
+    
+    private ArrayList<String> sampleAbout = new ArrayList<String>(5);
 	
 	private ArrayList<PlaceInfo> samplePlaces = new ArrayList<PlaceInfo>(5);
 	
@@ -229,7 +233,9 @@ public class GeneratorV03 {
 		String fullName = Tools.uppercaseFirstChar(nameObj.getString("first")) + " " + Tools.uppercaseFirstChar(nameObj.getString("last"));
 		JSONObject loginObj = obj.getJSONObject("login");
 		String profileName = loginObj.getString("username");
-		String about = sampleQuotes.get(rand.nextInt(sampleQuotes.size()));
+        String shortInfo = sampleShortInfo.get(rand.nextInt(sampleShortInfo.size()));
+        String publicShortInfo = samplePublicShortInfo.get(rand.nextInt(samplePublicShortInfo.size()));
+        String about = sampleAbout.get(rand.nextInt(sampleAbout.size()));
 		String email = obj.getString("email");
 		String dobDate = obj.getJSONObject("dob").getString("date");
 		String birthYear = dobDate.substring(0, 4);
@@ -264,7 +270,7 @@ public class GeneratorV03 {
 		// a better solution would be a weibul distribution modelled after
 		// https://blog.stephenwolfram.com/2013/04/data-science-of-the-facebook-world/
 		int targetFriendCount = (int)Math.round(nextCompressedGaussianRand()*200d + 300d);
-		return new SpxpProfileData(rand, baseUrl, profileName, fullName, about, gender, email, birthDayAndMonth, birthYear, hometown, location, latitude, longitude, profilePhoto, profileKeyPair, groupData, targetFriendCount);
+		return new SpxpProfileData(rand, baseUrl, profileName, fullName, shortInfo, publicShortInfo, about, gender, email, birthDayAndMonth, birthYear, hometown, location, latitude, longitude, profilePhoto, profileKeyPair, groupData, targetFriendCount);
 	}
 	
 	private void generatePosts(List<SpxpProfileData> profiles, int postsPerProfile, Date now) throws Exception {
@@ -509,7 +515,9 @@ public class GeneratorV03 {
 	}
 
 	private void loadSampleData() throws IOException {
-		Tools.loadDataFromFile("dataset/sample-quotes.txt", sampleQuotes);
+		Tools.loadDataFromFile("dataset/sample-quotes.txt", sampleShortInfo);
+        Tools.loadDataFromFile("dataset/sample-publicShortInfo.txt", samplePublicShortInfo);
+        Tools.loadDataFromFile("dataset/sample-about.txt", sampleAbout);
 		Tools.loadDataFromFile("dataset/sample-web-post-messages.txt", sampleWebPostMessages);
 		Tools.loadDataFromFile("dataset/sample-web-links.txt", sampleWebLinks);
 		Tools.loadDataFromFile("dataset/sample-photo-post-messages.txt", samplePhotoPostMessages);

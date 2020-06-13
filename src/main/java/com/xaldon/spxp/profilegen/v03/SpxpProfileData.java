@@ -38,6 +38,10 @@ public class SpxpProfileData {
 	private String profileName;
 	
 	private String fullName;
+    
+    private String shortInfo;
+    
+    private String publicShortInfo;
 	
 	private String about;
 	
@@ -88,6 +92,8 @@ public class SpxpProfileData {
 			String baseUri,
 			String profileName,
 			String fullName,
+            String shortInfo,
+            String publicShortInfo,
 			String about,
 			String gender,
 			String email,
@@ -105,7 +111,9 @@ public class SpxpProfileData {
 		this.profileName = profileName;
 		this.profileUri = baseUri + profileName;
 		this.fullName = fullName;
-		this.about = about;
+		this.shortInfo = shortInfo;
+        this.publicShortInfo = shortInfo;
+        this.about = about;
 		this.gender = gender;
 		this.email = email;
 		this.birthDayAndMonth = birthDayAndMonth;
@@ -195,6 +203,14 @@ public class SpxpProfileData {
 	public String getFullName() {
 		return fullName;
 	}
+
+    public String getShortInfo() {
+        return shortInfo;
+    }
+
+    public String getPublicShortInfo() {
+        return publicShortInfo;
+    }
 
 	public String getAbout() {
 		return about;
@@ -435,6 +451,10 @@ public class SpxpProfileData {
 		}
 		profileObj.put("ver", "0.3");
 		profileObj.put("name", fullName);
+        addSpxpElement(profileObj, privateData, "shortInfo", shortInfo);
+        if(!profileObj.has("shortInfo")) {
+            profileObj.put("shortInfo", publicShortInfo);
+        }
 		addSpxpElement(profileObj, privateData, "about", about);
 		addSpxpElement(profileObj, privateData, "gender", gender);
 		addSpxpElement(profileObj, privateData, "website", "https://example.com");
