@@ -1,11 +1,11 @@
 {
     "ver" : "0.3",
-    "name" : "Würzburg",
+    "name" : "WÃ¼rzburg",
     "about" : "City in the region of Franconia, northern Bavaria, Germany.",
     "website" : "https://www.wuerzburg.de/en/index.html",
     "coordinates" : {
         "latitude" : "49.783333",
         "longitude" : "9.933333"
     },
-    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Marienberg_wuerzburg.jpg/640px-Marienberg_wuerzburg.jpg",
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Marienberg_wuerzburg.jpg/640px-Marienberg_wuerzburg.jpg"
 }
