@@ -530,7 +530,7 @@ public class GeneratorV03 {
 		Tools.loadDataFromFile("dataset/sample-video-post-messages.txt", sampleVideoPostMessages);
 		Tools.loadDataFromFile("dataset/sample-preview-videos.txt", samplePreviewVideoUrls);
 		Tools.loadDataFromFile("dataset/sample-media-videos.txt", sampleMediaVideoUrls);
-		try(Scanner s = new Scanner(new File("dataset/sample-text-post-messages.txt")/*, "UTF-8"*/)) {
+		try(Scanner s = new Scanner(new File("dataset/sample-text-post-messages.txt"), "Cp1252")) {
 			s.useDelimiter("\\r\\n|\\n");
 			while(s.hasNext()) {
 				String x = Tools.cleanMessage(s.next());
