@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -243,8 +246,9 @@ public class GeneratorV03 {
 		String hometown = samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri();
 		PlaceInfo locationPlace = samplePlaces.get(rand.nextInt(samplePlaces.size()));
 		String location = locationPlace.getProfileUri();
-		double latitude = locationPlace.getRandomLatitude(rand.nextDouble());
-		double longitude = locationPlace.getRandomLongitude(rand.nextDouble());
+		DecimalFormat df = new DecimalFormat("#.0000", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+		String latitude = df.format(locationPlace.getRandomLatitude(rand.nextDouble()));
+		String longitude = df.format(locationPlace.getRandomLongitude(rand.nextDouble()));
 		int profileImageCount = gender.equals("male") ? PROFILE_IMAGE_COUNT_MALE : PROFILE_IMAGE_COUNT_FEMALE;
 		int imageid = id % profileImageCount;
 		String profilePhoto = gender.substring(0,1)+imageid+".jpg";

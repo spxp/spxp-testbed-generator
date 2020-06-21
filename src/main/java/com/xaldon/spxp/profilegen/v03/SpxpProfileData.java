@@ -57,9 +57,9 @@ public class SpxpProfileData {
 	
 	private String location;
 	
-	private double latitude;
+	private String latitude;
 	
-	private double longitude;
+	private String longitude;
 	
 	private String profilePhoto;
 	
@@ -101,8 +101,8 @@ public class SpxpProfileData {
 			String birthYear,
 			String hometown,
 			String location,
-			double latitude,
-			double longitude,
+			String latitude,
+			String longitude,
 			String profilePhoto,
 			SpxpProfileKeyPair profileKeyPair,
 			ArrayList<SpxpProfileGroupData> groups,
@@ -237,11 +237,11 @@ public class SpxpProfileData {
 		return location;
 	}
 
-	public double getLatitude() {
+	public String getLatitude() {
 		return latitude;
 	}
 
-	public double getLongitude() {
+	public String getLongitude() {
 		return longitude;
 	}
 
