@@ -3,6 +3,7 @@ package com.xaldon.spxp.profilegen.v03;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.spxp.crypto.SpxpCertificatePermission;
+import org.spxp.crypto.SpxpConnectKeyPair;
 import org.spxp.crypto.SpxpCryptoException;
 import org.spxp.crypto.SpxpCryptoToolsV03;
 import org.spxp.crypto.SpxpProfileKeyPair;
@@ -33,6 +34,10 @@ public class CryptoTools {
 	public static JSONObject getOrderedSymmetricJWK(SpxpSymmetricKeySpec keySpec) {
 		return Tools.orderObject(SpxpCryptoToolsV03.getSymmetricJWK(keySpec), SYMMETRICKEY_ORDER);
 	}
+    
+    public static JSONObject getOrderedPublicJWK(SpxpConnectKeyPair keyPair) {
+        return Tools.orderObject(SpxpCryptoToolsV03.getPublicJWK(keyPair), PUBLICKEY_ORDER);
+    }
 	
 	public static JSONObject createCertificate(SpxpProfileKeyPair authorizedSigningKeyPair, SpxpCertificatePermission[] permissions, SpxpProfileKeyPair profileKeyPair, JSONObject keyCertificate) throws SpxpCryptoException {
 		JSONObject result = Tools.newOrderPreservingJSONObject();

@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spxp.crypto.SpxpCertificatePermission;
+import org.spxp.crypto.SpxpConnectKeyPair;
 import org.spxp.crypto.SpxpCryptoException;
 import org.spxp.crypto.SpxpCryptoToolsV03;
 import org.spxp.crypto.SpxpProfileKeyPair;
@@ -32,6 +33,8 @@ import com.xaldon.spxp.profilegen.utils.Tools;
 public class SpxpProfileData {
 	
 	private Random rand;
+    
+    private String baseUri;
 
 	private String profileUri;
 
@@ -53,9 +56,9 @@ public class SpxpProfileData {
 	
 	private String birthYear;
 	
-	private String hometown;
+	private SpxpProfileReference hometown;
 	
-	private String location;
+	private SpxpProfileReference location;
 	
 	private String latitude;
 	
@@ -64,6 +67,8 @@ public class SpxpProfileData {
 	private String profilePhoto;
 	
 	private SpxpProfileKeyPair profileKeyPair;
+    
+    private SpxpConnectKeyPair connectKeyPair;
 	
 	private ArrayList<SpxpProfileGroupData> groups;
 	
@@ -99,15 +104,17 @@ public class SpxpProfileData {
 			String email,
 			String birthDayAndMonth,
 			String birthYear,
-			String hometown,
-			String location,
+			SpxpProfileReference hometown,
+			SpxpProfileReference location,
 			String latitude,
 			String longitude,
 			String profilePhoto,
 			SpxpProfileKeyPair profileKeyPair,
+            SpxpConnectKeyPair connectKeyPair,
 			ArrayList<SpxpProfileGroupData> groups,
 			int targetFriendCount) throws SpxpCryptoException {
 		this.rand = rand;
+		this.baseUri = baseUri;
 		this.profileName = profileName;
 		this.profileUri = baseUri + profileName;
 		this.fullName = fullName;
@@ -124,6 +131,7 @@ public class SpxpProfileData {
 		this.longitude = longitude;
 		this.profilePhoto = profilePhoto;
 		this.profileKeyPair = profileKeyPair;
+        this.connectKeyPair = connectKeyPair;
 		this.groups = groups;
 		this.nonVirtualGroupsCount = groups.size();
 		this.targetFriendCount = targetFriendCount;
@@ -229,11 +237,11 @@ public class SpxpProfileData {
 		return birthYear;
 	}
 
-	public String getHometown() {
+	public SpxpProfileReference getHometown() {
 		return hometown;
 	}
 
-	public String getLocation() {
+	public SpxpProfileReference getLocation() {
 		return location;
 	}
 
@@ -252,6 +260,14 @@ public class SpxpProfileData {
 	public SpxpProfileKeyPair getProfileKeyPair() {
 		return profileKeyPair;
 	}
+
+    public SpxpConnectKeyPair getConnectKeyPair() {
+        return connectKeyPair;
+    }
+
+    public SpxpProfileReference getProfileReference() {
+        return new SpxpProfileReference(profileUri, false, profileKeyPair);
+    }
 
 	public ArrayList<SpxpProfileGroupData> getGroups() {
 		return groups;
@@ -457,8 +473,8 @@ public class SpxpProfileData {
 		addSpxpElement(profileObj, privateData, "email", email);
 		addSpxpElement(profileObj, privateData, "birthDayAndMonth", birthDayAndMonth);
 		addSpxpElement(profileObj, privateData, "birthYear", birthYear);
-		addSpxpElement(profileObj, privateData, "hometown", hometown);
-		addSpxpElement(profileObj, privateData, "location", location);
+		addSpxpElement(profileObj, privateData, "hometown", hometown.toJSONObject());
+		addSpxpElement(profileObj, privateData, "location", location.toJSONObject());
 		JSONObject coordinatesObj = Tools.newOrderPreservingJSONObject();
 		coordinatesObj.put("latitude", latitude);
 		coordinatesObj.put("longitude", longitude);
@@ -482,7 +498,16 @@ public class SpxpProfileData {
 			}
 		}
 		profileObj.put("publicKey", CryptoTools.getOrderedPublicJWK(profileKeyPair));
-		// TODO: MISSING connect
+		JSONObject connectObj = Tools.newOrderPreservingJSONObject();
+		connectObj.put("endpoint", "_connect.php?profile="+profileName);
+        connectObj.put("key", CryptoTools.getOrderedPublicJWK(connectKeyPair));
+        JSONArray acceptedTokens = new JSONArray();
+        JSONObject webFlowTokenObj = Tools.newOrderPreservingJSONObject();
+        webFlowTokenObj.put("method", "spxp.org:webflow:1.0");
+        webFlowTokenObj.put("start", baseUri+"_acquire-token.php?profile="+profileName);
+        acceptedTokens.put(webFlowTokenObj);
+        connectObj.put("acceptedTokens", acceptedTokens);
+        profileObj.put("connect", connectObj);
 		if(!privateArray.isEmpty()) {
 			profileObj.put("private", privateArray);
 		}
@@ -534,25 +559,25 @@ public class SpxpProfileData {
 		}
 		JSONArray friendsData = new JSONArray();
 		for(SpxpFriendConnectionData frindConnection : friendConnections.values()) {
-			String friendUri = frindConnection.getPeerProfile().getProfileUri();
+			SpxpProfileReference friendRef = frindConnection.getPeerProfile().getProfileReference();
 			if(rand.nextInt(4) != 0) {
 				// 75% of friends connections are public
-				friendsData.put(friendUri);
+				friendsData.put(friendRef.toJSONObject());
 				continue;
 			}
 			if(privateData.size() == 1 || rand.nextInt(2) == 0) {
-				privateData.get(0).put(friendUri);
+				privateData.get(0).put(friendRef.toJSONObject());
 				continue;
 			}
 			boolean atLeastInOneGroup = false;
 			for(int i = 1; i < privateData.size(); i++) {
 				if(rand.nextInt(3) == 0) {
-					privateData.get(i).put(friendUri);
+					privateData.get(i).put(friendRef.toJSONObject());
 					atLeastInOneGroup = true;
 				}
 			}
 			if(!atLeastInOneGroup) {
-				privateData.get(0).put(friendUri);
+				privateData.get(0).put(friendRef.toJSONObject());
 			}
 		}
 		JSONObject friendsObj = Tools.newOrderPreservingJSONObject();

@@ -20,7 +20,10 @@ import java.util.Random;
 import java.util.Scanner;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.spxp.crypto.SpxpConnectKeyPair;
+import org.spxp.crypto.SpxpCryptoException;
 import org.spxp.crypto.SpxpCryptoToolsV03;
 import org.spxp.crypto.SpxpProfileKeyPair;
 
@@ -154,6 +157,8 @@ public class GeneratorV03 {
 		long duration = (end - start) / 1000;
 		Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_read-posts.php", new File(postsDir, "_read-posts.php"));
 		Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_read-keys.php", new File(keysDir, "_read-keys.php"));
+        Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_connect.php", new File(targetDir, "_connect.php"));
+        Tools.generateStaticPhpFile("com/xaldon/spxp/profilegen/v03/_acquire-token.php", new File(targetDir, "_acquire-token.php"));
 		System.out.println("writing all files took "+duration+"sec");
 		if(GENERATE_QR_CODES) {
 			System.out.println("Generating QR codes...");
@@ -243,9 +248,9 @@ public class GeneratorV03 {
 		String dobDate = obj.getJSONObject("dob").getString("date");
 		String birthYear = dobDate.substring(0, 4);
 		String birthDayAndMonth = dobDate.substring(8, 10) + "-" + dobDate.substring(5, 7);
-		String hometown = samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri();
+		SpxpProfileReference hometown = samplePlaces.get(rand.nextInt(samplePlaces.size())).getpProfileReference();
 		PlaceInfo locationPlace = samplePlaces.get(rand.nextInt(samplePlaces.size()));
-		String location = locationPlace.getProfileUri();
+		SpxpProfileReference location = locationPlace.getpProfileReference();
 		DecimalFormat df = new DecimalFormat("#.0000", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 		String latitude = df.format(locationPlace.getRandomLatitude(rand.nextDouble()));
 		String longitude = df.format(locationPlace.getRandomLongitude(rand.nextDouble()));
@@ -254,6 +259,8 @@ public class GeneratorV03 {
 		String profilePhoto = gender.substring(0,1)+imageid+".jpg";
 		SpxpProfileKeyPair profileKeyPair = SpxpCryptoToolsV03.generateProfileKeyPair();
 		profileKeyPair = new SpxpProfileKeyPair("key-"+profileName, profileKeyPair.getSecretKey(), profileKeyPair.getPublicKey());
+        SpxpConnectKeyPair connectKeyPair = SpxpCryptoToolsV03.generateConnectKeyPair();
+        connectKeyPair = new SpxpConnectKeyPair("connect-"+profileName, connectKeyPair.getSecretKey(), connectKeyPair.getPublicKey());
 		ArrayList<SpxpProfileGroupData> groupData = new ArrayList<SpxpProfileGroupData>(4);
 		groupData.add(new SpxpProfileGroupData("Friends", "grp-"+profileName+"-friends", false));
 		if(rand.nextInt(2) == 0) {
@@ -274,7 +281,7 @@ public class GeneratorV03 {
 		// a better solution would be a weibul distribution modelled after
 		// https://blog.stephenwolfram.com/2013/04/data-science-of-the-facebook-world/
 		int targetFriendCount = (int)Math.round(nextCompressedGaussianRand()*200d + 300d);
-		return new SpxpProfileData(rand, baseUrl, profileName, fullName, shortInfo, publicShortInfo, about, gender, email, birthDayAndMonth, birthYear, hometown, location, latitude, longitude, profilePhoto, profileKeyPair, groupData, targetFriendCount);
+		return new SpxpProfileData(rand, baseUrl, profileName, fullName, shortInfo, publicShortInfo, about, gender, email, birthDayAndMonth, birthYear, hometown, location, latitude, longitude, profilePhoto, profileKeyPair, connectKeyPair, groupData, targetFriendCount);
 	}
 	
 	private void generatePosts(List<SpxpProfileData> profiles, int postsPerProfile, Date now) throws Exception {
@@ -518,7 +525,7 @@ public class GeneratorV03 {
 		}
 	}
 
-	private void loadSampleData() throws IOException {
+	private void loadSampleData() throws IOException, JSONException, SpxpCryptoException {
 		Tools.loadDataFromFile("dataset/sample-quotes.txt", sampleShortInfo);
         Tools.loadDataFromFile("dataset/sample-publicShortInfo.txt", samplePublicShortInfo);
         Tools.loadDataFromFile("dataset/sample-about.txt", sampleAbout);
@@ -546,7 +553,8 @@ public class GeneratorV03 {
             s.useDelimiter("\\r\\n|\\n");
             while(s.hasNext()) {
                 String[] parts = s.next().split(" ");
-                samplePlaces.add(new PlaceInfo(parts[0], Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4])));
+                SpxpProfileKeyPair pkp = SpxpCryptoToolsV03.getProfileKeyPair(new JSONObject(parts[5]));
+                samplePlaces.add(new PlaceInfo(parts[0], pkp, Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4])));
             }
             if(s.ioException() != null) {
                 throw s.ioException();
