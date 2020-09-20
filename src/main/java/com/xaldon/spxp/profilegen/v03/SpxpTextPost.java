@@ -14,9 +14,9 @@ public class SpxpTextPost implements SpxpPost {
 	
 	private String message;
 	
-	private String place;
+	private SpxpProfileReference place;
 
-	public SpxpTextPost(Date seqDate, Date createDate, String message, String place) {
+	public SpxpTextPost(Date seqDate, Date createDate, String message, SpxpProfileReference place) {
 		this.seqDate = seqDate;
 		this.createDate = createDate;
 		this.message = message;
@@ -30,7 +30,7 @@ public class SpxpTextPost implements SpxpPost {
 		result.put("type", "text");
 		result.put("message", message);
 		if(place != null) {
-			result.put("place", place);
+			result.put("place", place.toJSONObject());
 		}
 		return result;
 	}

@@ -18,9 +18,9 @@ public class SpxpPhotoPost implements SpxpPost {
 	
 	private String smallUrl;
 	
-	private String place;
+	private SpxpProfileReference place;
 
-	public SpxpPhotoPost(Date seqDate, Date createDate, String message, String fullUrl, String smallUrl, String place) {
+	public SpxpPhotoPost(Date seqDate, Date createDate, String message, String fullUrl, String smallUrl, SpxpProfileReference place) {
 		this.seqDate = seqDate;
 		this.createDate = createDate;
 		this.message = message;
@@ -38,7 +38,7 @@ public class SpxpPhotoPost implements SpxpPost {
 		result.put("full", fullUrl);
 		result.put("small", smallUrl);
 		if(place != null) {
-			result.put("place", place);
+			result.put("place", place.toJSONObject());
 		}
 		return result;
 	}

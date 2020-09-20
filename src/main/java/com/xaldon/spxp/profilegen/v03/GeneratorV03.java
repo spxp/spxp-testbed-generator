@@ -337,7 +337,7 @@ public class GeneratorV03 {
 	
 	private SpxpPost generateTextPost(Date seqDate) {
 		String message = sampleTextPostMessages.get(rand.nextInt(sampleTextPostMessages.size()));
-		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri() : null;
+		SpxpProfileReference place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getpProfileReference() : null;
 		Date createDate = new Date(seqDate.getTime() - rand.nextInt(4 * 60 * 60 * 1000)); // post created up to 4 hrs before being received by server
 		return new SpxpTextPost(seqDate, createDate, message, place);
 	}
@@ -351,7 +351,7 @@ public class GeneratorV03 {
 
 	private SpxpPost generatePhotoPost(Date seqDate) {
 		String message = samplePhotoPostMessages.get(rand.nextInt(samplePhotoPostMessages.size()));
-		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri() : null;
+		SpxpProfileReference place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getpProfileReference() : null;
         int i = rand.nextInt(sampleSmallPhotoUrls.size());
         String fullUrl = sampleRegularPhotoUrls.get(i);
         String smallUrl = sampleSmallPhotoUrls.get(i);
@@ -361,7 +361,7 @@ public class GeneratorV03 {
 
 	private SpxpPost generateVideoPost(Date seqDate) {
 		String message = sampleVideoPostMessages.get(rand.nextInt(sampleVideoPostMessages.size()));
-		String place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getProfileUri() : null;
+		SpxpProfileReference place = (rand.nextInt(2) != 0) ? samplePlaces.get(rand.nextInt(samplePlaces.size())).getpProfileReference() : null;
         int i = rand.nextInt(samplePreviewVideoUrls.size());
         String mediaUrl = sampleMediaVideoUrls.get(i);
         String previewUrl = samplePreviewVideoUrls.get(i);

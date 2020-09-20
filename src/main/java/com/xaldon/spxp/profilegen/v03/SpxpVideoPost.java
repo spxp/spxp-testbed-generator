@@ -18,9 +18,9 @@ public class SpxpVideoPost implements SpxpPost {
 	
 	private String previewUrl;
 	
-	private String place;
+	private SpxpProfileReference place;
 
-	public SpxpVideoPost(Date seqDate, Date createDate, String message, String mediaUrl, String previewUrl, String place) {
+	public SpxpVideoPost(Date seqDate, Date createDate, String message, String mediaUrl, String previewUrl, SpxpProfileReference place) {
 		this.seqDate = seqDate;
 		this.createDate = createDate;
 		this.message = message;
@@ -38,7 +38,7 @@ public class SpxpVideoPost implements SpxpPost {
 		result.put("preview", previewUrl);
 		result.put("media", mediaUrl);
 		if(place != null) {
-			result.put("place", place);
+			result.put("place", place.toJSONObject());
 		}
 		return result;
 	}
