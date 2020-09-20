@@ -553,7 +553,7 @@ public class GeneratorV03 {
             s.useDelimiter("\\r\\n|\\n");
             while(s.hasNext()) {
                 String[] parts = s.next().split(" ");
-                SpxpProfileKeyPair pkp = SpxpCryptoToolsV03.getProfileKeyPair(new JSONObject(parts[5]));
+                SpxpProfileKeyPair pkp = parts.length > 5 ? SpxpCryptoToolsV03.getProfileKeyPair(new JSONObject(parts[5])) : null;
                 samplePlaces.add(new PlaceInfo(parts[0], pkp, Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4])));
             }
             if(s.ioException() != null) {

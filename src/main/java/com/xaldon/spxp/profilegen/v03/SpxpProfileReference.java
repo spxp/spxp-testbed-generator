@@ -39,7 +39,7 @@ public class SpxpProfileReference {
             JSONObject publicKeyDef = Tools.newOrderPreservingJSONObject();
             publicKeyDef.put("src", "dns");
             result.put("publicKey", publicKeyDef);
-        } else {
+        } else if (profileKeyPair != null) {
             result.put("publicKey", CryptoTools.getOrderedPublicJWK(profileKeyPair));
         }
         return result;

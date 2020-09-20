@@ -30,13 +30,17 @@ public class CryptoTools {
 	public static JSONObject getOrderedPublicJWK(SpxpProfileKeyPair keyPair) {
 		return Tools.orderObject(SpxpCryptoToolsV03.getPublicJWK(keyPair), PUBLICKEY_ORDER);
 	}
-	
-	public static JSONObject getOrderedSymmetricJWK(SpxpSymmetricKeySpec keySpec) {
-		return Tools.orderObject(SpxpCryptoToolsV03.getSymmetricJWK(keySpec), SYMMETRICKEY_ORDER);
-	}
+    
+    public static JSONObject getOrderedKeypairJWK(SpxpConnectKeyPair keyPair) {
+        return Tools.orderObject(SpxpCryptoToolsV03.getKeypairJWK(keyPair), KEYPAIR_ORDER);
+    }
     
     public static JSONObject getOrderedPublicJWK(SpxpConnectKeyPair keyPair) {
         return Tools.orderObject(SpxpCryptoToolsV03.getPublicJWK(keyPair), PUBLICKEY_ORDER);
+    }
+    
+    public static JSONObject getOrderedSymmetricJWK(SpxpSymmetricKeySpec keySpec) {
+        return Tools.orderObject(SpxpCryptoToolsV03.getSymmetricJWK(keySpec), SYMMETRICKEY_ORDER);
     }
 	
 	public static JSONObject createCertificate(SpxpProfileKeyPair authorizedSigningKeyPair, SpxpCertificatePermission[] permissions, SpxpProfileKeyPair profileKeyPair, JSONObject keyCertificate) throws SpxpCryptoException {

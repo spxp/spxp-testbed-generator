@@ -8,5 +8,11 @@
         "latitude" : "52.52",
         "longitude" : "13.405"
     },
-    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Brandenburger_Tor_abends.jpg/640px-Brandenburger_Tor_abends.jpg"
+    "profilePhoto" : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Brandenburger_Tor_abends.jpg/640px-Brandenburger_Tor_abends.jpg",
+    "publicKey": {
+        "kid": "G3NNkjawvCRJ-GlQ",
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "bqmX83bf8_pG7S9YB1fY4SjK8J3pYavwI-GlLAUeiQs"
+    }
 }

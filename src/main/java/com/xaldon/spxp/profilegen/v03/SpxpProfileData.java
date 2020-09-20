@@ -381,6 +381,7 @@ public class SpxpProfileData {
 		// basics
 		profileObj.put("profileUri", profileUri);
 		profileObj.put("profileKeyPair", CryptoTools.getOrderedKeypairJWK(profileKeyPair));
+        profileObj.put("connectKeyPair", CryptoTools.getOrderedKeypairJWK(connectKeyPair));
 		// impersonationKeys
 		JSONArray impersonationKeysArray = new JSONArray();
 		for(SpxpProfileImpersonationKey pik : allImpersonationKeys) {
@@ -498,16 +499,18 @@ public class SpxpProfileData {
 			}
 		}
 		profileObj.put("publicKey", CryptoTools.getOrderedPublicJWK(profileKeyPair));
-		JSONObject connectObj = Tools.newOrderPreservingJSONObject();
-		connectObj.put("endpoint", "_connect.php?profile="+profileName);
-        connectObj.put("key", CryptoTools.getOrderedPublicJWK(connectKeyPair));
-        JSONArray acceptedTokens = new JSONArray();
-        JSONObject webFlowTokenObj = Tools.newOrderPreservingJSONObject();
-        webFlowTokenObj.put("method", "spxp.org:webflow:1.0");
-        webFlowTokenObj.put("start", baseUri+"_acquire-token.php?profile="+profileName);
-        acceptedTokens.put(webFlowTokenObj);
-        connectObj.put("acceptedTokens", acceptedTokens);
-        profileObj.put("connect", connectObj);
+        if(rand.nextInt(3) == 0) {
+            JSONObject connectObj = Tools.newOrderPreservingJSONObject();
+            connectObj.put("endpoint", "_connect.php?profile="+profileName);
+            connectObj.put("key", CryptoTools.getOrderedPublicJWK(connectKeyPair));
+            JSONArray acceptedTokens = new JSONArray();
+            JSONObject webFlowTokenObj = Tools.newOrderPreservingJSONObject();
+            webFlowTokenObj.put("method", "spxp.org:webflow:1.0");
+            webFlowTokenObj.put("start", baseUri+"_acquire-token.php?profile="+profileName);
+            acceptedTokens.put(webFlowTokenObj);
+            connectObj.put("acceptedTokens", acceptedTokens);
+            profileObj.put("connect", connectObj);
+        }
 		if(!privateArray.isEmpty()) {
 			profileObj.put("private", privateArray);
 		}
