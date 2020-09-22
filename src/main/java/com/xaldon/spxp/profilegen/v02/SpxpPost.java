@@ -6,8 +6,8 @@ import org.json.JSONObject;
 
 public interface SpxpPost {
 
-	JSONObject toJSONObject();
+    JSONObject toJSONObject();
 
-	Date getPostDate();
+    Date getPostDate();
 
 }
