@@ -58,7 +58,7 @@ public class PlaceInfo {
     }
 
     public SpxpProfileReference getpProfileReference() {
-        return new SpxpProfileReference(profileUri, false, profileKeyPair);
+        return new SpxpProfileReference(profileUri, false, profileKeyPair.extractProfilePublicKey());
     }
 
 }

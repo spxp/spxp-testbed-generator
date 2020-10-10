@@ -23,9 +23,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.spxp.crypto.SpxpCertificatePermission;
 import org.spxp.crypto.SpxpConnectKeyPair;
+import org.spxp.crypto.SpxpConnectPublicKey;
 import org.spxp.crypto.SpxpCryptoException;
 import org.spxp.crypto.SpxpCryptoToolsV03;
 import org.spxp.crypto.SpxpProfileKeyPair;
+import org.spxp.crypto.SpxpProfilePublicKey;
 import org.spxp.crypto.SpxpSymmetricKeySpec;
 
 import com.xaldon.spxp.profilegen.utils.Tools;
@@ -180,7 +182,7 @@ public class SpxpProfileData {
     
     private SpxpProfileImpersonationKey createImpersonationKey(SpxpCertificatePermission[] permissions, SpxpProfileImpersonationKey parentAuthority) throws SpxpCryptoException {
         SpxpProfileKeyPair keyPair = SpxpCryptoToolsV03.generateProfileKeyPair();
-        JSONObject certificate = CryptoTools.createCertificate(keyPair, permissions, parentAuthority.getKeyPair(), parentAuthority.getCertificate());
+        JSONObject certificate = CryptoTools.createCertificate(keyPair.extractProfilePublicKey(), permissions, parentAuthority.getKeyPair(), parentAuthority.getCertificate());
         SpxpProfileImpersonationKey result = new SpxpProfileImpersonationKey(keyPair, certificate);
         this.allImpersonationKeys.add(result);
         return result;
@@ -261,12 +263,20 @@ public class SpxpProfileData {
         return profileKeyPair;
     }
 
+    public SpxpProfilePublicKey getProfilePublicKey() {
+        return profileKeyPair.extractProfilePublicKey();
+    }
+
     public SpxpConnectKeyPair getConnectKeyPair() {
         return connectKeyPair;
     }
 
+    public SpxpConnectPublicKey getConnectPublicKey() {
+        return connectKeyPair.extractConnectPublicKey();
+    }
+
     public SpxpProfileReference getProfileReference() {
-        return new SpxpProfileReference(profileUri, false, profileKeyPair);
+        return new SpxpProfileReference(profileUri, false, getProfilePublicKey());
     }
 
     public ArrayList<SpxpProfileGroupData> getGroups() {
@@ -327,7 +337,7 @@ public class SpxpProfileData {
             if(rand.nextInt(4) > 0) {
                 SpxpCertificatePermission[] pcPermissions = new SpxpCertificatePermission[] {
                         SpxpCertificatePermission.POST };
-                issuedCertificate = CryptoTools.createCertificate(peer.getProfileKeyPair(), pcPermissions, profileKeyPair, null);
+                issuedCertificate = CryptoTools.createCertificate(peer.getProfilePublicKey(), pcPermissions, profileKeyPair, null);
             }
             fcd.setIssuedReaderKeyAndCertificate(issuedReaderKey, issuedCertificate);
             peer.provideConnectionData(this, issuedReaderKey, issuedCertificate);
@@ -498,11 +508,11 @@ public class SpxpProfileData {
                 privateArray.put(SpxpCryptoToolsV03.encryptSymmetricCompact(p.toString(), keySpec));
             }
         }
-        profileObj.put("publicKey", CryptoTools.getOrderedPublicJWK(profileKeyPair));
+        profileObj.put("publicKey", CryptoTools.getOrderedPublicJWK(getProfilePublicKey()));
         if(rand.nextInt(3) == 0) {
             JSONObject connectObj = Tools.newOrderPreservingJSONObject();
             connectObj.put("endpoint", "_connect.php?profile="+profileName);
-            connectObj.put("key", CryptoTools.getOrderedPublicJWK(connectKeyPair));
+            connectObj.put("key", CryptoTools.getOrderedPublicJWK(getConnectPublicKey()));
             JSONArray acceptedTokens = new JSONArray();
             JSONObject webFlowTokenObj = Tools.newOrderPreservingJSONObject();
             webFlowTokenObj.put("method", "spxp.org:webflow:1.0");

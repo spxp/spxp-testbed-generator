@@ -1,7 +1,7 @@
 package com.xaldon.spxp.profilegen.v03;
 
 import org.json.JSONObject;
-import org.spxp.crypto.SpxpProfileKeyPair;
+import org.spxp.crypto.SpxpProfilePublicKey;
 
 import com.xaldon.spxp.profilegen.utils.Tools;
 
@@ -11,13 +11,13 @@ public class SpxpProfileReference {
     
     private boolean keySourceDns;
     
-    private SpxpProfileKeyPair profileKeyPair;
+    private SpxpProfilePublicKey profilePublicKey;
 
-    public SpxpProfileReference(String uri, boolean keySourceDns, SpxpProfileKeyPair profileKeyPair) {
+    public SpxpProfileReference(String uri, boolean keySourceDns, SpxpProfilePublicKey profilePublicKey) {
         super();
         this.uri = uri;
         this.keySourceDns = keySourceDns;
-        this.profileKeyPair = profileKeyPair;
+        this.profilePublicKey = profilePublicKey;
     }
 
     public String getUri() {
@@ -28,8 +28,8 @@ public class SpxpProfileReference {
         return keySourceDns;
     }
 
-    public SpxpProfileKeyPair getProfileKeyPair() {
-        return profileKeyPair;
+    public SpxpProfilePublicKey getProfilePublicKey() {
+        return profilePublicKey;
     }
 
     public JSONObject toJSONObject() {
@@ -39,8 +39,8 @@ public class SpxpProfileReference {
             JSONObject publicKeyDef = Tools.newOrderPreservingJSONObject();
             publicKeyDef.put("src", "dns");
             result.put("publicKey", publicKeyDef);
-        } else if (profileKeyPair != null) {
-            result.put("publicKey", CryptoTools.getOrderedPublicJWK(profileKeyPair));
+        } else if (profilePublicKey != null) {
+            result.put("publicKey", CryptoTools.getOrderedPublicJWK(profilePublicKey));
         }
         return result;
     }
