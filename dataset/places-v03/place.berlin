@@ -14,5 +14,9 @@
         "kty": "OKP",
         "crv": "Ed25519",
         "x": "bqmX83bf8_pG7S9YB1fY4SjK8J3pYavwI-GlLAUeiQs"
+    },
+    "signature": {
+        "sig": "unM6gtX7Xg3x4a5axKfLRILndZrr8ADQvVm0aDeelPbXvnF5CJ1rwrFvhBp8QNVVf5SXWD9Qw-sXKbKTuc1ICw",
+        "key": "G3NNkjawvCRJ-GlQ"
     }
 }
