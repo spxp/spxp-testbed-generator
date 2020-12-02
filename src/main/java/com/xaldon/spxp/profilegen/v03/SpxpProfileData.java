@@ -35,8 +35,6 @@ import com.xaldon.spxp.profilegen.utils.Tools;
 public class SpxpProfileData {
     
     private Random rand;
-    
-    private String baseUri;
 
     private String profileUri;
 
@@ -116,7 +114,6 @@ public class SpxpProfileData {
             ArrayList<SpxpProfileGroupData> groups,
             int targetFriendCount) throws SpxpCryptoException {
         this.rand = rand;
-        this.baseUri = baseUri;
         this.profileName = profileName;
         this.profileUri = baseUri + profileName;
         this.fullName = fullName;
@@ -513,12 +510,6 @@ public class SpxpProfileData {
             JSONObject connectObj = Tools.newOrderPreservingJSONObject();
             connectObj.put("endpoint", "_connect.php?profile="+profileName);
             connectObj.put("key", CryptoTools.getOrderedPublicJWK(getConnectPublicKey()));
-            JSONArray acceptedTokens = new JSONArray();
-            JSONObject webFlowTokenObj = Tools.newOrderPreservingJSONObject();
-            webFlowTokenObj.put("method", "spxp.org:webflow:1.0");
-            webFlowTokenObj.put("start", baseUri+"_acquire-token.php?profile="+profileName);
-            acceptedTokens.put(webFlowTokenObj);
-            connectObj.put("acceptedTokens", acceptedTokens);
             profileObj.put("connect", connectObj);
         }
         if(!privateArray.isEmpty()) {
