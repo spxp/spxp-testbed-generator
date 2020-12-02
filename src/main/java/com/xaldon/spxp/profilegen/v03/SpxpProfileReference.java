@@ -9,23 +9,16 @@ public class SpxpProfileReference {
     
     private String uri;
     
-    private boolean keySourceDns;
-    
     private SpxpProfilePublicKey profilePublicKey;
 
-    public SpxpProfileReference(String uri, boolean keySourceDns, SpxpProfilePublicKey profilePublicKey) {
+    public SpxpProfileReference(String uri, SpxpProfilePublicKey profilePublicKey) {
         super();
         this.uri = uri;
-        this.keySourceDns = keySourceDns;
         this.profilePublicKey = profilePublicKey;
     }
 
     public String getUri() {
         return uri;
-    }
-
-    public boolean isKeySourceDns() {
-        return keySourceDns;
     }
 
     public SpxpProfilePublicKey getProfilePublicKey() {
@@ -35,11 +28,7 @@ public class SpxpProfileReference {
     public JSONObject toJSONObject() {
         JSONObject result = Tools.newOrderPreservingJSONObject();
         result.put("uri", uri);
-        if(keySourceDns) {
-            JSONObject publicKeyDef = Tools.newOrderPreservingJSONObject();
-            publicKeyDef.put("src", "dns");
-            result.put("publicKey", publicKeyDef);
-        } else if (profilePublicKey != null) {
+        if (profilePublicKey != null) {
             result.put("publicKey", CryptoTools.getOrderedPublicJWK(profilePublicKey));
         }
         return result;

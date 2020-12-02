@@ -276,7 +276,7 @@ public class SpxpProfileData {
     }
 
     public SpxpProfileReference getProfileReference() {
-        return new SpxpProfileReference(profileUri, false, getProfilePublicKey());
+        return new SpxpProfileReference(profileUri, getProfilePublicKey());
     }
 
     public ArrayList<SpxpProfileGroupData> getGroups() {
