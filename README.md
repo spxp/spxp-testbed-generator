@@ -66,3 +66,23 @@ this tool, clients still need to drop and re-read all group key material.
 Connections between profiles however remain.
 
 
+## Generating profiles of SPXP version 0.3
+To generate the original testbed that can be found on http://testbed.spxp.org/0.3/,
+perform these steps:
+
+1. Run the tool `org.spxp.tools.testbedgen.prepare.DownloadProfileImages`.
+It will download a set of sample profile images and store them in the local
+folder `./profile_images`
+2. Run the tool `org.spxp.tools.testbedgen.v03.GeneratorV03`. It will create the
+files in the local folder `./v0.3`.
+3. Copy or move the images from `./profile_images` to `./v0.3/images`
+4. Copy the pre-created city profiles from `./dataset/places-v03` to `./v0.3`
+
+The behavior as well as the base URL can be adopted by changing some
+[constants](./src/main/java/org/spxp/tools/testbedgen/v03/GeneratorV03.java#L35)
+at the top of this file.  
+This tool will generate new cryptographically secure keys on each run. After
+re-creating profiles with this tool, clients need to drop and re-read all
+profiles since their profile keys and connection keys won't match.
+
+
